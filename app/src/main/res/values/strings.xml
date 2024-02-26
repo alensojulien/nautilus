@@ -1,8 +1,7 @@
 <resources>
-    <string name="app_name">nautilus</string>
+    <string name="app_name">Nautilus</string>
     <string name="welcome_slogan">Carantec Nautisme, plongeons !</string>
     <string name="welcome_description">Carantec Nautisme vous accompagne dans vos plongées. Nos adhérent.e.s propose différentes activités pour tous les niveaux !\n</string>
     <string name="welcome_connect_btn">Se connecter</string>
     <string name="welcome_logo_desc">Nautilus logo</string>
-
 </resources>
