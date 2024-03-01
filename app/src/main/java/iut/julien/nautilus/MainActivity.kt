@@ -117,7 +117,7 @@ fun AppTopBar(
                 overflow = TextOverflow.Ellipsis
             )
         },
-        navigationIcon = {
+        /*navigationIcon = {
             println(navController.previousBackStackEntry?.destination?.route)
             if (navController.previousBackStackEntry?.destination?.route != null) {
                 IconButton(onClick = {
@@ -130,7 +130,7 @@ fun AppTopBar(
                     )
                 }
             }
-        },
+        },*/
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
     )
 }

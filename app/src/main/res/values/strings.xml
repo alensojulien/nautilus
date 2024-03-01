@@ -4,4 +4,6 @@
     <string name="welcome_description">Carantec Nautisme vous accompagne dans vos plongées. Nos adhérent.e.s propose différentes activités pour tous les niveaux !\n</string>
     <string name="welcome_connect_btn">Se connecter</string>
     <string name="welcome_logo_desc">Nautilus logo</string>
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="no_internet_connection_message">Activate your mobile data or connect to a wifi network.</string>
 </resources>
