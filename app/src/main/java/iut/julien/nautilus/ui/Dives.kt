@@ -23,6 +23,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.Dive
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
+import javax.net.ssl.HttpsURLConnection
+import kotlin.concurrent.thread
 
 
 class Dives {
@@ -82,7 +88,10 @@ class Dives {
 
     @Composable
     fun DivesContent(modifier: Modifier = Modifier) {
-        val dives = retrieveDives()
+        var dives: MutableList<Dive> = mutableListOf()
+        thread {
+            dives = retrieveDives()
+        }
         Column (
             modifier = modifier.padding(16.dp)
         ) {
@@ -93,6 +102,28 @@ class Dives {
     }
 
     private fun retrieveDives(): MutableList<Dive> {
-        
+        val dives = mutableListOf<Dive>()
+        val url: URL = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/dives")
+
+        with(url.openConnection() as HttpsURLConnection) {
+            requestMethod = "GET"
+
+            println("URL : $url")
+            println("Response Code : $responseCode")
+
+            BufferedReader(InputStreamReader(inputStream)).use {
+                val response = StringBuffer()
+
+                var inputLine = it.readLine()
+                while (inputLine != null) {
+                    response.append(inputLine)
+                    inputLine = it.readLine()
+                }
+                it.close()
+                println("Response : $response")
+            }
+        }
+
+        return dives
     }
 }
