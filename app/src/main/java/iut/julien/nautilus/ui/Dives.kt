@@ -97,14 +97,16 @@ class Dives {
         ) {
             Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
 
-
+            for (dive in dives) {
+                Text(text = dive.getDiveLocation())
+            }
         }
     }
 
     private fun retrieveDives(): MutableList<Dive> {
         val dives = mutableListOf<Dive>()
         val url: URL = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/dives")
-
+        var response = StringBuffer()
         with(url.openConnection() as HttpsURLConnection) {
             requestMethod = "GET"
 
@@ -112,8 +114,6 @@ class Dives {
             println("Response Code : $responseCode")
 
             BufferedReader(InputStreamReader(inputStream)).use {
-                val response = StringBuffer()
-
                 var inputLine = it.readLine()
                 while (inputLine != null) {
                     response.append(inputLine)
@@ -123,7 +123,7 @@ class Dives {
                 println("Response : $response")
             }
         }
-
+        dives = mutableListOf(Json.decodeFromString(response.toString()))
         return dives
     }
 }

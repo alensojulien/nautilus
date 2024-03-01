@@ -1,6 +1,6 @@
 package iut.julien.nautilus.ui.model
 
-class Dive(
+data class Dive(
     private var diveId: Int,
     private var diveDate: String,
     private var diveTime: String,
