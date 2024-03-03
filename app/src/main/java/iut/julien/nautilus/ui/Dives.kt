@@ -23,9 +23,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.Dive
+import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.net.HttpURLConnection
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import kotlin.concurrent.thread
@@ -55,9 +55,11 @@ class Dives {
                 )
             },
             onDismissRequest = { openDialog.value = false },
-            confirmButton = { Button(onClick = { openDialog.value = false }) {
-                Text(text = "Done")
-            }  },
+            confirmButton = {
+                Button(onClick = { openDialog.value = false }) {
+                    Text(text = "Done")
+                }
+            },
             title = {
                 Text(stringResource(id = R.string.no_internet_connection))
             },
@@ -88,30 +90,31 @@ class Dives {
 
     @Composable
     fun DivesContent(modifier: Modifier = Modifier) {
-        var dives: MutableList<Dive> = mutableListOf()
+        val dives: MutableList<Dive> = mutableListOf()
         thread {
-            dives = retrieveDives()
+            println(dives)
+            retrieveDives(dives)
+            println(dives)
         }
-        Column (
+        Column(
             modifier = modifier.padding(16.dp)
         ) {
             Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
 
             for (dive in dives) {
-                Text(text = dive.getDiveLocation())
+                Text(text = dive.diveLocation)
             }
         }
     }
 
-    private fun retrieveDives(): MutableList<Dive> {
-        val dives = mutableListOf<Dive>()
-        val url: URL = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/dives")
-        var response = StringBuffer()
+    private fun retrieveDives(dives: MutableList<Dive>) {
+        val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/dives")
+        val response = StringBuffer()
         with(url.openConnection() as HttpsURLConnection) {
             requestMethod = "GET"
 
-            println("URL : $url")
-            println("Response Code : $responseCode")
+//            println("URL : $url")
+//            println("Response Code : $responseCode")
 
             BufferedReader(InputStreamReader(inputStream)).use {
                 var inputLine = it.readLine()
@@ -120,10 +123,27 @@ class Dives {
                     inputLine = it.readLine()
                 }
                 it.close()
-                println("Response : $response")
+//                println("Response : $response")
             }
         }
-        dives = mutableListOf(Json.decodeFromString(response.toString()))
-        return dives
+
+        val jsonObject = JSONObject(response.toString())
+//        println(jsonObject.getJSONArray("data"))
+        for (i in 0..<jsonObject.getJSONArray("data").length()) {
+            val dive = Dive(
+                diveDate = jsonObject.getJSONArray("data").getJSONObject(i).getString("DS_DATE"),
+                diveId = jsonObject.getJSONArray("data").getJSONObject(i).getString("DS_CODE"),
+                diveDepth = jsonObject.getJSONArray("data").getJSONObject(i).getString("DL_DEPTH"),
+                diveLocation = jsonObject.getJSONArray("data").getJSONObject(i)
+                    .getString("DL_NAME"),
+                diveNumberDivers = jsonObject.getJSONArray("data").getJSONObject(i)
+                    .getString("DS_DIVERS_COUNT"),
+                diveMaxNumberDivers = jsonObject.getJSONArray("data").getJSONObject(i)
+                    .getString("DS_MAX_DIVERS"),
+                diveTime = jsonObject.getJSONArray("data").getJSONObject(i)
+                    .getString("CAR_SCHEDULE")
+            )
+            dives.add(dive)
+        }
     }
 }
