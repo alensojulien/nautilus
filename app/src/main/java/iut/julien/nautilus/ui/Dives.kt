@@ -5,11 +5,15 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import iut.julien.nautilus.R
+import iut.julien.nautilus.ui.model.Dive
 import iut.julien.nautilus.ui.model.DiveListViewModel
 
 
@@ -90,14 +95,35 @@ class Dives {
     @Composable
     fun DivesContent(diveListViewModel: DiveListViewModel, modifier: Modifier = Modifier) {
         val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
-
-        Column(
-            modifier = modifier.padding(16.dp)
+        LazyColumn(
+            modifier = modifier
+                .padding(16.dp, 0.dp)
+                .fillMaxWidth()
         ) {
-            Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
-            divesList?.forEach { dive ->
-                Text(text = dive.diveLocation)
+            item {
+                Spacer(modifier = Modifier.padding(8.dp))
+                Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
+                Spacer(modifier = Modifier.padding(8.dp))
             }
+            items(divesList.size) { index ->
+                DiveCard(divesList[index])
+            }
+        }
+    }
+}
+
+@Composable
+fun DiveCard(dive: Dive, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(text = "Location: ${dive.diveLocation}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "Date: ${dive.diveDate}", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

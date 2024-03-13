@@ -16,9 +16,7 @@ import javax.net.ssl.HttpsURLConnection
 
 class DiveListViewModel : ViewModel() {
     private val _divesList = MutableLiveData<MutableList<Dive>>(
-        mutableStateListOf(
-            Dive("DS1", "19/11/2024", "9h", "50m", "ta mère", "8", "10")
-        )
+        mutableStateListOf()
     )
     val divesList = _divesList.asFlow()
 
