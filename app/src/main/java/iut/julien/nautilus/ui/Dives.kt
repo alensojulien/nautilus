@@ -15,6 +15,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -99,15 +101,14 @@ class Dives {
 
     @Composable
     fun DivesContent(diveListViewModel: DiveListViewModel, modifier: Modifier = Modifier) {
+        val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
+
         Column(
             modifier = modifier.padding(16.dp)
         ) {
-            Text(text = "Dives list - taille = ${diveListViewModel.divesList.value?.size}", style = MaterialTheme.typography.headlineMedium)
-            for (i in 0..<(diveListViewModel.divesList.value?.size ?: 0)) {
-                val dive = diveListViewModel.divesList.value?.get(i)
-                if (dive != null) {
-                    Text(text = dive.diveLocation)
-                }
+            Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
+            divesList?.forEach { dive ->
+                Text(text = dive.diveLocation)
             }
         }
     }

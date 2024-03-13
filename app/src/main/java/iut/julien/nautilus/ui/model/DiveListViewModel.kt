@@ -3,6 +3,7 @@ package iut.julien.nautilus.ui.model
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,13 +16,20 @@ import javax.net.ssl.HttpsURLConnection
 
 class DiveListViewModel : ViewModel() {
 
-    val divesList: MutableLiveData<MutableList<Dive>> by lazy {
-        MutableLiveData<MutableList<Dive>>(
-            mutableStateListOf(
-                Dive("DS1", "19/11/2024", "9h", "50m", "ta mère", "8", "10")
-            )
+//    val divesList: MutableLiveData<MutableList<Dive>> by lazy {
+//        MutableLiveData<MutableList<Dive>>(
+//            mutableStateListOf(
+//                Dive("DS1", "19/11/2024", "9h", "50m", "ta mère", "8", "10")
+//            )
+//        )
+//    }
+
+    private val _divesList = MutableLiveData<MutableList<Dive>>(
+        mutableStateListOf(
+            Dive("DS1", "19/11/2024", "9h", "50m", "ta mère", "8", "10")
         )
-    }
+    )
+    val divesList = _divesList.asFlow()
 
     fun retrieveDives() {
         viewModelScope.launch {
@@ -46,27 +54,28 @@ class DiveListViewModel : ViewModel() {
                 val jsonObject = JSONObject(response.toString())
 //        println(jsonObject.getJSONArray("data"))
                 for (i in 0..<jsonObject.getJSONArray("data").length()) {
-                    val dive = Dive(
-                        diveDate = jsonObject.getJSONArray("data").getJSONObject(i)
-                            .getString("DS_DATE"),
-                        diveId = jsonObject.getJSONArray("data").getJSONObject(i)
-                            .getString("DS_CODE"),
-                        diveDepth = jsonObject.getJSONArray("data").getJSONObject(i)
-                            .getString("DL_DEPTH"),
-                        diveLocation = jsonObject.getJSONArray("data").getJSONObject(i)
-                            .getString("DL_NAME"),
-                        diveNumberDivers = jsonObject.getJSONArray("data").getJSONObject(i)
-                            .getString("DS_DIVERS_COUNT"),
-                        diveMaxNumberDivers = jsonObject.getJSONArray("data").getJSONObject(i)
-                            .getString("DS_MAX_DIVERS"),
-                        diveTime = jsonObject.getJSONArray("data").getJSONObject(i)
-                            .getString("CAR_SCHEDULE")
+                    listOfDives.add(
+                        Dive(
+                            diveDate = jsonObject.getJSONArray("data").getJSONObject(i)
+                                .getString("DS_DATE"),
+                            diveId = jsonObject.getJSONArray("data").getJSONObject(i)
+                                .getString("DS_CODE"),
+                            diveDepth = jsonObject.getJSONArray("data").getJSONObject(i)
+                                .getString("DL_DEPTH"),
+                            diveLocation = jsonObject.getJSONArray("data").getJSONObject(i)
+                                .getString("DL_NAME"),
+                            diveNumberDivers = jsonObject.getJSONArray("data").getJSONObject(i)
+                                .getString("DS_DIVERS_COUNT"),
+                            diveMaxNumberDivers = jsonObject.getJSONArray("data").getJSONObject(i)
+                                .getString("DS_MAX_DIVERS"),
+                            diveTime = jsonObject.getJSONArray("data").getJSONObject(i)
+                                .getString("CAR_SCHEDULE")
+                        )
                     )
-                    listOfDives.add(dive)
                 }
                 println(listOfDives.size)
-                divesList.postValue(listOfDives)
-                println(divesList.value?.size)
+                _divesList.postValue(listOfDives)
+                println(_divesList.value?.size)
             }
         }
     }
