@@ -15,15 +15,6 @@ import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
 class DiveListViewModel : ViewModel() {
-
-//    val divesList: MutableLiveData<MutableList<Dive>> by lazy {
-//        MutableLiveData<MutableList<Dive>>(
-//            mutableStateListOf(
-//                Dive("DS1", "19/11/2024", "9h", "50m", "ta mère", "8", "10")
-//            )
-//        )
-//    }
-
     private val _divesList = MutableLiveData<MutableList<Dive>>(
         mutableStateListOf(
             Dive("DS1", "19/11/2024", "9h", "50m", "ta mère", "8", "10")
@@ -47,12 +38,10 @@ class DiveListViewModel : ViewModel() {
                             inputLine = it.readLine()
                         }
                         it.close()
-//                println("Response : $response")
                     }
                 }
 
                 val jsonObject = JSONObject(response.toString())
-//        println(jsonObject.getJSONArray("data"))
                 for (i in 0..<jsonObject.getJSONArray("data").length()) {
                     listOfDives.add(
                         Dive(
@@ -73,9 +62,7 @@ class DiveListViewModel : ViewModel() {
                         )
                     )
                 }
-                println(listOfDives.size)
                 _divesList.postValue(listOfDives)
-                println(_divesList.value?.size)
             }
         }
     }
