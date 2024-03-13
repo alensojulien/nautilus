@@ -15,26 +15,34 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.Dive
+import iut.julien.nautilus.ui.model.DiveListViewModel
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
-import kotlin.concurrent.thread
 
 
 class Dives {
 
     @Composable
     fun DivesScreen() {
+        val diveListViewModel: DiveListViewModel = viewModel()
         val openDialog = remember { mutableStateOf(true) }
 
         if (!isOnline(LocalContext.current) && openDialog.value) {
@@ -42,7 +50,8 @@ class Dives {
             return
         }
 
-        DivesContent()
+        diveListViewModel.retrieveDives()
+        DivesContent(diveListViewModel = diveListViewModel)
     }
 
     @Composable
@@ -89,61 +98,17 @@ class Dives {
     }
 
     @Composable
-    fun DivesContent(modifier: Modifier = Modifier) {
-        val dives: MutableList<Dive> = mutableListOf()
-        thread {
-            println(dives)
-            retrieveDives(dives)
-            println(dives)
-        }
+    fun DivesContent(diveListViewModel: DiveListViewModel, modifier: Modifier = Modifier) {
         Column(
             modifier = modifier.padding(16.dp)
         ) {
-            Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
-
-            for (dive in dives) {
-                Text(text = dive.diveLocation)
-            }
-        }
-    }
-
-    private fun retrieveDives(dives: MutableList<Dive>) {
-        val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/dives")
-        val response = StringBuffer()
-        with(url.openConnection() as HttpsURLConnection) {
-            requestMethod = "GET"
-
-//            println("URL : $url")
-//            println("Response Code : $responseCode")
-
-            BufferedReader(InputStreamReader(inputStream)).use {
-                var inputLine = it.readLine()
-                while (inputLine != null) {
-                    response.append(inputLine)
-                    inputLine = it.readLine()
+            Text(text = "Dives list - taille = ${diveListViewModel.divesList.value?.size}", style = MaterialTheme.typography.headlineMedium)
+            for (i in 0..<(diveListViewModel.divesList.value?.size ?: 0)) {
+                val dive = diveListViewModel.divesList.value?.get(i)
+                if (dive != null) {
+                    Text(text = dive.diveLocation)
                 }
-                it.close()
-//                println("Response : $response")
             }
-        }
-
-        val jsonObject = JSONObject(response.toString())
-//        println(jsonObject.getJSONArray("data"))
-        for (i in 0..<jsonObject.getJSONArray("data").length()) {
-            val dive = Dive(
-                diveDate = jsonObject.getJSONArray("data").getJSONObject(i).getString("DS_DATE"),
-                diveId = jsonObject.getJSONArray("data").getJSONObject(i).getString("DS_CODE"),
-                diveDepth = jsonObject.getJSONArray("data").getJSONObject(i).getString("DL_DEPTH"),
-                diveLocation = jsonObject.getJSONArray("data").getJSONObject(i)
-                    .getString("DL_NAME"),
-                diveNumberDivers = jsonObject.getJSONArray("data").getJSONObject(i)
-                    .getString("DS_DIVERS_COUNT"),
-                diveMaxNumberDivers = jsonObject.getJSONArray("data").getJSONObject(i)
-                    .getString("DS_MAX_DIVERS"),
-                diveTime = jsonObject.getJSONArray("data").getJSONObject(i)
-                    .getString("CAR_SCHEDULE")
-            )
-            dives.add(dive)
         }
     }
 }
