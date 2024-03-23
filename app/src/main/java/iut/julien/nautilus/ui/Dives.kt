@@ -129,25 +129,18 @@ fun DiveCard(dive: Dive, modifier: Modifier = Modifier) {
             modifier = Modifier.padding(16.dp).fillMaxWidth()
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Filled.LocationOn, contentDescription = "Location icon")
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = dive.diveLocation, style = MaterialTheme.typography.headlineMedium)
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Filled.DateRange, contentDescription = "Date icon")
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = dive.diveDate, style = MaterialTheme.typography.bodyLarge)
-                }
+                Icon(Icons.Filled.LocationOn, contentDescription = "Location icon")
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(text = dive.diveLocation, style = MaterialTheme.typography.headlineMedium)
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Filled.DateRange, contentDescription = "Date icon")
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(text = dive.diveDate, style = MaterialTheme.typography.bodyLarge)
             }
         }
     }
