@@ -4,26 +4,30 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,9 +38,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -106,7 +108,7 @@ class Dives {
     }
 
     @Composable
-    fun DivesContent(diveListViewModel: DiveListViewModel, modifier: Modifier = Modifier) {
+    fun DivesContent(diveListViewModel: DiveListViewModel) {
         val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
         LazyColumn(
             modifier = Modifier
@@ -126,7 +128,16 @@ class Dives {
 }
 
 @Composable
-fun DiveCard(dive: Dive, modifier: Modifier = Modifier) {
+fun DiveCard(dive: Dive) {
+    val cardExpendedState = remember { mutableStateOf(false) }
+    val cardExpandedHeight by animateDpAsState(
+        if (cardExpendedState.value) 100.dp else 0.dp,
+        label = "Card expanded height animation"
+    )
+    val arrowDownOrientation by animateFloatAsState(
+        if (cardExpendedState.value) 180f else 0f,
+        label = "Arrow orientation animation"
+    )
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -137,53 +148,69 @@ fun DiveCard(dive: Dive, modifier: Modifier = Modifier) {
             .fillMaxWidth()
     ) {
         Column {
-            Column(
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .fillMaxWidth()
                     .background(
                         color = MaterialTheme.colorScheme.primaryContainer,
                         shape = RoundedCornerShape(16.dp)
                     )
                     .padding(16.dp)
+                    .fillMaxWidth()
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Filled.LocationOn, contentDescription = "Location icon")
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = dive.diveLocation,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Filled.LocationOn, contentDescription = "Location icon")
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = dive.diveLocation,
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Filled.DateRange, contentDescription = "Date icon")
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = dive.diveDate,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Filled.DateRange, contentDescription = "Date icon")
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = dive.diveDate,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                IconButton(onClick = { cardExpendedState.value = !cardExpendedState.value }) {
+                    Icon(
+                        Icons.Filled.KeyboardArrowDown,
+                        contentDescription = "Arrow down icon",
+                        modifier = Modifier.rotate(arrowDownOrientation)
                     )
                 }
             }
-            HorizontalDivider()
             Column(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.secondaryContainer)
                     .fillMaxWidth()
+                    .height(cardExpandedHeight)
             ) {
-                Row {
+                HorizontalDivider()
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(
-                        text = "Dive depth: ${dive.diveDepth}",
+                        text = "Dive depth: ${dive.diveDepth}m",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                     Text(
-                        text = "Number of divers: ${dive.diveNumberDivers}",
+                        text = "Number of divers: ${dive.diveNumberDivers}/${dive.diveMaxNumberDivers}",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onSecondaryContainer
