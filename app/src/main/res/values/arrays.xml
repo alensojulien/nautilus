@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="start_time_options">
+        <item>matin</item>
+        <item>apres-midi</item>
+        <item>soir</item>
+    </string-array>
+</resources>
