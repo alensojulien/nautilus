@@ -12,6 +12,8 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.net.ssl.HttpsURLConnection
 
 class DiveListViewModel : ViewModel() {
@@ -41,10 +43,17 @@ class DiveListViewModel : ViewModel() {
 
                 val jsonObject = JSONObject(response.toString())
                 for (i in 0..<jsonObject.getJSONArray("data").length()) {
+                    val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                    val date = LocalDate.parse(
+                        jsonObject.getJSONArray("data").getJSONObject(i)
+                            .getString("DS_DATE"), dateFormat
+                    )
+                    val dateFormatted =
+                        (if (date.dayOfMonth > 9) date.dayOfMonth.toString() else "0" + date.dayOfMonth.toString()) + "/" + (if (date.monthValue > 9) date.monthValue else "0" + date.monthValue) + "/" +
+                                date.year.toString()
                     listOfDives.add(
                         Dive(
-                            diveDate = jsonObject.getJSONArray("data").getJSONObject(i)
-                                .getString("DS_DATE"),
+                            diveDate = dateFormatted,
                             diveId = jsonObject.getJSONArray("data").getJSONObject(i)
                                 .getString("DS_CODE"),
                             diveDepth = jsonObject.getJSONArray("data").getJSONObject(i)
