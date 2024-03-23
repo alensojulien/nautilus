@@ -238,7 +238,10 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
-                HorizontalDivider(modifier = Modifier.padding(16.dp, 0.dp), color = MaterialTheme.colorScheme.onSecondaryContainer)
+                HorizontalDivider(
+                    modifier = Modifier.padding(16.dp, 0.dp),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(16.dp)
@@ -266,13 +269,23 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
                         Text(text = "${diver.diverFirstName} ${diver.diverName}")
                     }
                 }
-                Row (
+                Row(
                     horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth().padding(0.dp, 16.dp, 0.dp, 0.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp, 16.dp, 0.dp, 0.dp)
                 ) {
-                    Button(onClick = {
-                        diveListViewModel.registerToDive(diveIndex = diveIndex)
-                    }) {
+                    var isRegistered = false
+                    dive.diveDivers.forEach {
+                        if (it.diverId == diveListViewModel.userID.value) isRegistered = true
+                    }
+
+                    Button(
+                        onClick = {
+                            diveListViewModel.registerToDive(diveIndex = diveIndex)
+                        },
+                        enabled = !isRegistered
+                    ) {
                         Text(text = "Register to this dive")
                     }
                 }
