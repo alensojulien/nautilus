@@ -126,7 +126,6 @@ class Dives {
 
                     ) {
                         CircularProgressIndicator(
-                            modifier = Modifier.width(64.dp),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             trackColor = MaterialTheme.colorScheme.primaryContainer,
                         )
