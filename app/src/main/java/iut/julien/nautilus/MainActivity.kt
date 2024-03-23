@@ -3,15 +3,16 @@ package iut.julien.nautilus
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -23,15 +24,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import iut.julien.nautilus.ui.ScreenEnum
+import iut.julien.nautilus.ui.model.DiveListViewModel
 import iut.julien.nautilus.ui.theme.NautilusTheme
 
 /**
@@ -59,20 +65,19 @@ class MainActivity : ComponentActivity() {
  */
 @Composable
 fun NautilusApp(modifier: Modifier = Modifier) {
+    val diveListViewModel: DiveListViewModel = viewModel()
     val navController = rememberNavController()
     val selectedScreen = remember { mutableIntStateOf(0) }
     Scaffold(
         topBar = {
             AppTopBar(
                 navController = navController,
-                modifier = modifier,
                 selectedScreen = selectedScreen
             )
         },
         bottomBar = {
             AppNavigationBar(
                 navController = navController,
-                modifier = modifier,
                 selectedScreen = selectedScreen
             )
         }
@@ -87,7 +92,7 @@ fun NautilusApp(modifier: Modifier = Modifier) {
             ) {
                 for (screen in ScreenEnum.entries) {
                     composable(screen.routeName) {
-                        screen.GetContent()
+                        screen.GetContent(diveListViewModel)
                     }
                 }
             }
@@ -98,7 +103,6 @@ fun NautilusApp(modifier: Modifier = Modifier) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopBar(
-    modifier: Modifier,
     navController: NavHostController,
     selectedScreen: MutableIntState
 ) {
@@ -109,28 +113,22 @@ fun AppTopBar(
             titleContentColor = MaterialTheme.colorScheme.primary,
         ),
         title = {
-            var text = stringResource(id = R.string.app_name)
-            ScreenEnum.entries.forEach { screen -> run { if (screen.routeName == navController.currentDestination?.route) text += " - " + screen.routeName } }
-            Text(
-                text = text,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        /*navigationIcon = {
-            println(navController.previousBackStackEntry?.destination?.route)
-            if (navController.previousBackStackEntry?.destination?.route != null) {
-                IconButton(onClick = {
-                    navController.popBackStack()
-                    selectedScreen.intValue = selectedScreen.intValue
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Localized description"
-                    )
-                }
+            Row (
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo_simple),
+                    contentDescription = "App icon",
+                    modifier = Modifier.width(32.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(id = R.string.app_name),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-        },*/
+        },
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
     )
 }
@@ -142,7 +140,6 @@ fun AppTopBar(
  */
 @Composable
 fun AppNavigationBar(
-    modifier: Modifier = Modifier,
     navController: NavController,
     selectedScreen: MutableIntState
 ) {
@@ -159,11 +156,6 @@ fun AppNavigationBar(
                 selected = selectedScreen.intValue == index,
                 onClick = {
                     navController.navigate(item.routeName)
-                    /*{
-                        popUpTo(navController.graph.id) {
-                            inclusive = true
-                        }
-                    }*/
                     selectedScreen.intValue = index
                 }
             )
