@@ -79,6 +79,7 @@ class DiveListViewModel : ViewModel() {
                 }
                 _divesList.postValue(listOfDives)
             }
+            println(listOfDives[0])
         }
     }
 }

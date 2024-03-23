@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.Dive
 import iut.julien.nautilus.ui.model.DiveListViewModel
-
 
 class Dives {
 
@@ -117,6 +117,21 @@ class Dives {
                 Spacer(modifier = Modifier.padding(8.dp))
                 Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
                 Spacer(modifier = Modifier.padding(8.dp))
+            }
+            if (divesList.isEmpty()) {
+                item {
+                    Row (
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.width(64.dp),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            trackColor = MaterialTheme.colorScheme.primaryContainer,
+                        )
+                    }
+                }
             }
             items(divesList.size) { index ->
                 DiveCard(divesList[index])
