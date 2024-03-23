@@ -155,11 +155,12 @@
         </LinearLayout>
 
         <Button
+            android:id="@+id/CREATE"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="createDive"
             android:text="Créer une plongée"
-            android:layout_margin="5dp"/>
+            android:layout_margin="5dp"
+            />
 
     </LinearLayout>
 

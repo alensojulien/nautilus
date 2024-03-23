@@ -1,7 +1,10 @@
 package iut.julien.nautilus.ui
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
 import android.widget.Spinner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,6 +18,9 @@ import java.io.BufferedReader
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import org.json.JSONObject
+import java.io.IOException
+import java.nio.charset.StandardCharsets
+import java.time.LocalDate
 
 class DiveCreation {
     @Composable
@@ -66,12 +72,42 @@ class DiveCreation {
                 fillList(directorSpinner, director)
                 fillList(piloteSpinner, pilote)
                 fillList(securitySpinner, security)
+                val numberDivers = view.findViewById<EditText>(R.id.DS_MIN_DIVER)
+                val maxNumberDivers = view.findViewById<EditText>(R.id.DS_MAX_DIVER)
+                numberDivers.setOnFocusChangeListener { _, _ ->
+                    if(!checkNumberDivers(numberDivers.text.toString(), maxNumberDivers.text.toString())){
+                        numberDivers.error = "The number of divers must be less than the maximum number of divers"
+                    }else{
+                        maxNumberDivers.error = null
+
+                    }
+                }
+                maxNumberDivers.setOnFocusChangeListener { _, _ ->
+                    if(!checkNumberDivers(numberDivers.text.toString(), maxNumberDivers.text.toString())){
+                        maxNumberDivers.error = "The number of divers must be less than the maximum number of divers"
+                    }else{
+                        numberDivers.error = null
+                    }
+                }
+                val date = view.findViewById<EditText>(R.id.DS_DATE)
+                date.setOnFocusChangeListener { _, _ ->
+                    if(!checkDate(date.text.toString())){
+                        date.error = "The date must be less than the current date"
+                    }
+                }
+                val button = view.findViewById<Button>(R.id.CREATE)
+                button.setOnClickListener {
+                    if(checkNumberDivers(numberDivers.text.toString(), maxNumberDivers.text.toString()) && checkDate(date.text.toString())){
+                        val data = "DS_DATE=${date.text}&DS_LOCATION=${locationSpinner.selectedItem}&DS_BOAT=${boatSpinner.selectedItem}&DS_LEVEL=${levelSpinner.selectedItem}&DS_DIRECTOR=${directorSpinner.selectedItem}&DS_PILOT=${piloteSpinner.selectedItem}&DS_SECURITY=${securitySpinner.selectedItem}&DS_MIN_DIVER=${numberDivers.text}&DS_MAX_DIVER=${maxNumberDivers.text}"
+                        createDive(data)
+                    }
+                }
                 view
             }
         )
     }
 
-    suspend fun requestToAPIData(url: URL, name: String): List<String>{
+    private suspend fun requestToAPIData(url: URL, name: String): List<String>{
         return withContext(Dispatchers.IO){
             val responseLocation = StringBuffer()
             with(url.openConnection() as HttpsURLConnection) {
@@ -83,15 +119,14 @@ class DiveCreation {
                         inputLine = it.readLine()
                     }
                     it.close()
-                    val location = parseList(responseLocation.toString(), name)
-                    return@withContext location
+                    return@withContext parseList(responseLocation.toString(), name)
                 }
             }
         }
     }
 
     private fun parseList(response: String, name: String): List<String> {
-        var locationList = mutableListOf<String>()
+        val locationList = mutableListOf<String>()
         var jsonObject = JSONObject()
         try{
             jsonObject = JSONObject(response)
@@ -190,4 +225,36 @@ class DiveCreation {
             return@withContext dataList
         }
     }
+
+    private fun checkNumberDivers(numberDivers: String, maxNumberDivers: String): Boolean {
+        if(numberDivers.isEmpty() || maxNumberDivers.isEmpty()){
+            return false
+        }
+        return numberDivers.toInt() <= maxNumberDivers.toInt()
+    }
+
+    private fun checkDate(date: String): Boolean {
+        if(date.isEmpty()){
+            return false
+        }
+        if(!date.matches(Regex("([0-9]{2})/([0-9]{2})/([0-9]{4})"))){
+            return false
+        }
+        return true
+    }
+
+    private fun createDive(data: String) {
+        val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/createdive")
+        with(url.openConnection() as HttpsURLConnection) {
+            requestMethod = "POST"
+            doOutput = true
+            outputStream.write(data.toByteArray(StandardCharsets.UTF_8))
+            outputStream.flush()
+            if(responseCode == 200){
+                Log.d("DiveCreation", "Dive created")
+            }
+        }
+    }
+
+
 }
