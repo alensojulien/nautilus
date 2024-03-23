@@ -32,7 +32,7 @@ class SettingsDialog {
         displayIDSettings: MutableState<Boolean>,
         diveListViewModel: DiveListViewModel
     ) {
-        val userID = remember { mutableStateOf("") }
+        val userID = remember { mutableStateOf(diveListViewModel.userID.value ?: "") }
         val pattern = Regex("^(\\s*|\\d+)\$")
         Dialog(onDismissRequest = { displayIDSettings.value = false }) {
             Card(
@@ -83,5 +83,4 @@ class SettingsDialog {
             }
         }
     }
-
 }
