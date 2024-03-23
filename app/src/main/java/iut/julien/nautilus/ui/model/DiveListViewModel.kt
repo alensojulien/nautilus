@@ -4,7 +4,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -166,6 +165,21 @@ class DiveListViewModel : ViewModel() {
                 _divesList.postValue(_divesList.value)
                 println(listOfDivers.getOrNull(0) ?: "No diver")
             }
+        }
+    }
+
+    fun registerToDive(diveIndex: Int) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/subscribe?US_ID=${userID.value}&DS_CODE=${_divesList.value?.get(diveIndex)?.diveId}")
+                with(url.openConnection() as HttpsURLConnection) {
+                    requestMethod = "POST"
+                    doOutput = true
+                    outputStream.flush()
+                    println("Post response code : $responseCode")
+                }
+            }
+            retrieveDives()
         }
     }
 }

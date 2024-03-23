@@ -266,6 +266,16 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
                         Text(text = "${diver.diverFirstName} ${diver.diverName}")
                     }
                 }
+                Row (
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth().padding(0.dp, 16.dp, 0.dp, 0.dp)
+                ) {
+                    Button(onClick = {
+                        diveListViewModel.registerToDive(diveIndex = diveIndex)
+                    }) {
+                        Text(text = "Register to this dive")
+                    }
+                }
             }
         }
     }
