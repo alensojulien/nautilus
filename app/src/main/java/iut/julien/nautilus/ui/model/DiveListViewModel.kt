@@ -27,21 +27,26 @@ class DiveListViewModel : ViewModel() {
             val listOfDives: MutableList<Dive> = mutableStateListOf()
             withContext(Dispatchers.IO) {
                 val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/dives")
-                val response = StringBuffer()
+                val responseDives = StringBuffer()
                 with(url.openConnection() as HttpsURLConnection) {
                     requestMethod = "GET"
 
                     BufferedReader(InputStreamReader(inputStream)).use {
                         var inputLine = it.readLine()
                         while (inputLine != null) {
-                            response.append(inputLine)
+                            responseDives.append(inputLine)
                             inputLine = it.readLine()
                         }
                         it.close()
                     }
                 }
 
-                val jsonObject = JSONObject(response.toString())
+                var jsonObject = JSONObject()
+                try {
+                    jsonObject = JSONObject(responseDives.toString())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
                 for (i in 0..<jsonObject.getJSONArray("data").length()) {
                     val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                     val date = LocalDate.parse(

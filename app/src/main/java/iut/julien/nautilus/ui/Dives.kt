@@ -42,7 +42,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.Dive
 import iut.julien.nautilus.ui.model.DiveListViewModel
@@ -51,8 +50,7 @@ import iut.julien.nautilus.ui.model.DiveListViewModel
 class Dives {
 
     @Composable
-    fun DivesScreen() {
-        val diveListViewModel: DiveListViewModel = viewModel()
+    fun DivesScreen(diveListViewModel: DiveListViewModel) {
         val openDialog = remember { mutableStateOf(true) }
 
         if (!isOnline(LocalContext.current) && openDialog.value) {
