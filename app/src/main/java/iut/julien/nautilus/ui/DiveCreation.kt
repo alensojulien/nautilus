@@ -12,7 +12,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.viewinterop.AndroidView
 import iut.julien.nautilus.R
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.net.URL
@@ -243,16 +245,28 @@ class DiveCreation {
         return true
     }
 
-    private fun createDive(data: String) {
-        val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/createdive")
-        with(url.openConnection() as HttpsURLConnection) {
-            requestMethod = "POST"
-            doOutput = true
-            outputStream.write(data.toByteArray(StandardCharsets.UTF_8))
-            outputStream.flush()
-            if(responseCode == 200){
-                Log.d("DiveCreation", "Dive created")
+
+    private suspend fun sendData(data: String){
+        return withContext(Dispatchers.IO){
+            val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/createdive")
+            with(url.openConnection() as HttpsURLConnection) {
+                requestMethod = "POST"
+                doOutput = true
+                outputStream.write(data.toByteArray(StandardCharsets.UTF_8))
+                outputStream.flush()
+                if (responseCode == 200) {
+                    Log.d("DiveCreation", "Dive created")
+                }else{
+                    Log.d(responseMessage, "Error")
+                }
             }
+        }
+    }
+
+
+    private fun createDive(data: String) {
+        (CoroutineScope(Dispatchers.IO)).launch {
+            sendData(data)
         }
     }
 
