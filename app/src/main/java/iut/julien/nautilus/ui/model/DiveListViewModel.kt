@@ -20,6 +20,9 @@ class DiveListViewModel : ViewModel() {
     private val _divesList = MutableLiveData<MutableList<Dive>>(
         mutableStateListOf()
     )
+
+    var userID = MutableLiveData("")
+
     val divesList = _divesList.asFlow()
 
     fun retrieveDives() {

@@ -1,10 +1,10 @@
 package iut.julien.nautilus.ui
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.outlined.Create
-import androidx.compose.material.icons.outlined.List
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import iut.julien.nautilus.ui.model.DiveListViewModel
@@ -17,8 +17,8 @@ enum class ScreenEnum(
 ) {
     Dives(
         routeName = "Dives",
-        icon = Icons.Outlined.List,
-        iconFilled = Icons.Filled.List,
+        icon = Icons.AutoMirrored.Outlined.List,
+        iconFilled = Icons.AutoMirrored.Filled.List,
         contentDescription = "Dives"
     ) {
         @Composable
