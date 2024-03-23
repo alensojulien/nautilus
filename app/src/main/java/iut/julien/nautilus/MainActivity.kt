@@ -8,8 +8,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,14 +29,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -68,6 +79,7 @@ fun NautilusApp(modifier: Modifier = Modifier) {
     val diveListViewModel: DiveListViewModel = viewModel()
     val navController = rememberNavController()
     val selectedScreen = remember { mutableIntStateOf(0) }
+    val displayIDSettings = remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             AppTopBar(
@@ -78,7 +90,8 @@ fun NautilusApp(modifier: Modifier = Modifier) {
         bottomBar = {
             AppNavigationBar(
                 navController = navController,
-                selectedScreen = selectedScreen
+                selectedScreen = selectedScreen,
+                displayIDSettings = displayIDSettings
             )
         }
     ) { innerPadding ->
@@ -97,6 +110,9 @@ fun NautilusApp(modifier: Modifier = Modifier) {
                 }
             }
         }
+        if (displayIDSettings.value) {
+            IDSettingsScreen()
+        }
     }
 }
 
@@ -113,13 +129,13 @@ fun AppTopBar(
             titleContentColor = MaterialTheme.colorScheme.primary,
         ),
         title = {
-            Row (
+            Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.logo_simple),
                     contentDescription = "App icon",
-                    modifier = Modifier.width(32.dp)
+                    modifier = Modifier.width(48.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -141,7 +157,8 @@ fun AppTopBar(
 @Composable
 fun AppNavigationBar(
     navController: NavController,
-    selectedScreen: MutableIntState
+    selectedScreen: MutableIntState,
+    displayIDSettings: MutableState<Boolean>
 ) {
     NavigationBar {
         ScreenEnum.entries.forEachIndexed { index, item ->
@@ -158,6 +175,34 @@ fun AppNavigationBar(
                     navController.navigate(item.routeName)
                     selectedScreen.intValue = index
                 }
+            )
+        }
+        NavigationBarItem(
+            selected = false,
+            onClick = { displayIDSettings.value = !displayIDSettings.value },
+            icon = {
+                Icon(Icons.Filled.Settings, contentDescription = "Diver ID Settings")
+            },
+            label = { Text("Settings") })
+    }
+}
+
+@Composable
+fun IDSettingsScreen() {
+    Dialog(onDismissRequest = { /* TODO */ }) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Text(
+                text = "This is a minimal dialog",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.Center),
+                textAlign = TextAlign.Center,
             )
         }
     }
