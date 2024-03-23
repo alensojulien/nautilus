@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.LocationOn
@@ -19,6 +21,8 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,6 +34,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -102,7 +109,7 @@ class Dives {
     fun DivesContent(diveListViewModel: DiveListViewModel, modifier: Modifier = Modifier) {
         val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
         LazyColumn(
-            modifier = modifier
+            modifier = Modifier
                 .padding(16.dp, 0.dp)
                 .fillMaxWidth()
         ) {
@@ -121,26 +128,67 @@ class Dives {
 @Composable
 fun DiveCard(dive: Dive, modifier: Modifier = Modifier) {
     Card(
-        modifier = modifier
+        modifier = Modifier
             .padding(8.dp)
+            .background(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer
+            )
             .fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp).fillMaxWidth()
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+        Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp)
             ) {
-                Icon(Icons.Filled.LocationOn, contentDescription = "Location icon")
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(text = dive.diveLocation, style = MaterialTheme.typography.headlineMedium)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Filled.LocationOn, contentDescription = "Location icon")
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = dive.diveLocation,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Filled.DateRange, contentDescription = "Date icon")
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = dive.diveDate,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            HorizontalDivider()
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .fillMaxWidth()
             ) {
-                Icon(Icons.Filled.DateRange, contentDescription = "Date icon")
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(text = dive.diveDate, style = MaterialTheme.typography.bodyLarge)
+                Row {
+                    Text(
+                        text = "Dive depth: ${dive.diveDepth}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    Text(
+                        text = "Number of divers: ${dive.diveNumberDivers}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
             }
         }
     }
