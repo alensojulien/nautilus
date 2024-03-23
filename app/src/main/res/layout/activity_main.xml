@@ -103,8 +103,7 @@
             <Spinner
                 android:id="@+id/DS_LEVEL"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:entries="@array/start_time_options"/>
+                android:layout_height="match_parent"/>
         </LinearLayout>
 
         <EditText
