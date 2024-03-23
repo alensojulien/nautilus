@@ -40,17 +40,11 @@ class DiveCreation {
             factory = { context ->
                 val view = LayoutInflater.from(context).inflate(R.layout.activity_main, null)
                 val locationSpinner = view.findViewById<Spinner>(R.id.DS_LOCATION)
-                val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, locationList)
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                locationSpinner.adapter = adapter
                 val boatSpinner = view.findViewById<Spinner>(R.id.DS_BOAT)
-                val adapterBoat = ArrayAdapter(context, android.R.layout.simple_spinner_item, boatList)
-                adapterBoat.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                boatSpinner.adapter = adapterBoat
                 val levelSpinner = view.findViewById<Spinner>(R.id.DS_LEVEL)
-                val adapterLevel = ArrayAdapter(context, android.R.layout.simple_spinner_item, levelList)
-                adapterLevel.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                levelSpinner.adapter = adapterLevel
+                fillList(locationSpinner, locationList)
+                fillList(boatSpinner, boatList)
+                fillList(levelSpinner, levelList)
                 view
             }
         )
@@ -90,4 +84,9 @@ class DiveCreation {
         return locationList
     }
 
+    private fun fillList(spinner: Spinner, list: List<String>){
+        val adapter = ArrayAdapter(spinner.context, android.R.layout.simple_spinner_item, list)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+    }
 }
