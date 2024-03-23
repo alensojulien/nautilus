@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
@@ -29,6 +30,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -120,7 +122,7 @@ class Dives {
             }
             if (divesList.isEmpty()) {
                 item {
-                    Row (
+                    Row(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
 
@@ -133,23 +135,31 @@ class Dives {
                 }
             }
             items(divesList.size) { index ->
-                DiveCard(divesList[index])
+                DiveCard(
+                    dive = divesList[index],
+                    diveIndex = index,
+                    diveListViewModel = diveListViewModel
+                )
             }
         }
     }
 }
 
 @Composable
-fun DiveCard(dive: Dive) {
+fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
     val cardExpendedState = remember { mutableStateOf(false) }
     val cardExpandedHeight by animateDpAsState(
-        if (cardExpendedState.value) 100.dp else 0.dp,
+        if (cardExpendedState.value) 250.dp else 0.dp,
         label = "Card expanded height animation"
     )
     val arrowDownOrientation by animateFloatAsState(
         if (cardExpendedState.value) 180f else 0f,
         label = "Arrow orientation animation"
     )
+    if (cardExpendedState.value) {
+        println("Dive index: $diveIndex")
+        diveListViewModel.retrieveDivers(diveIndex = diveIndex)
+    }
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -213,20 +223,48 @@ fun DiveCard(dive: Dive) {
                 HorizontalDivider()
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
                     Text(
                         text = "Dive depth: ${dive.diveDepth}m",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                     Text(
                         text = "Number of divers: ${dive.diveNumberDivers}/${dive.diveMaxNumberDivers}",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
+                }
+                HorizontalDivider(modifier = Modifier.padding(16.dp, 0.dp), color = MaterialTheme.colorScheme.onSecondaryContainer)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = "List icon")
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(text = "Divers list", style = MaterialTheme.typography.headlineSmall)
+                }
+                LazyColumn(
+                    modifier = Modifier.padding(16.dp, 0.dp)
+                ) {
+                    if (dive.diveDivers.isEmpty()) {
+                        item {
+                            LinearProgressIndicator(
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                trackColor = MaterialTheme.colorScheme.primaryContainer,
+                                modifier = Modifier
+                                    .padding(10.dp, 10.dp)
+                                    .fillMaxWidth()
+                            )
+                        }
+                    }
+                    items(dive.diveDivers.size) { diverIndex ->
+                        val diver = dive.diveDivers[diverIndex]
+                        Text(text = "${diver.diverFirstName} ${diver.diverName}")
+                    }
                 }
             }
         }
