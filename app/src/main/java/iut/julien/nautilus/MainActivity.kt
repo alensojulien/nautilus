@@ -70,6 +70,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun NautilusApp(modifier: Modifier = Modifier) {
     val diveListViewModel: DiveListViewModel = viewModel()
+    diveListViewModel.retrieveDives()
     val navController = rememberNavController()
     val selectedScreen = remember { mutableIntStateOf(0) }
     val displayIDSettings = remember { mutableStateOf(false) }

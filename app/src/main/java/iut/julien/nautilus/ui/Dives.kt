@@ -59,7 +59,6 @@ class Dives {
             return
         }
 
-        diveListViewModel.retrieveDives()
         DivesContent(diveListViewModel = diveListViewModel)
     }
 
@@ -255,7 +254,7 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
                         }
                     }
                     items(dive.diveDivers.size) { diverIndex ->
-                        val diver = dive.diveDivers[diverIndex]
+                        val diver = remember { dive.diveDivers[diverIndex] }
                         Text(text = "${diver.diverFirstName} ${diver.diverName}")
                     }
                 }
@@ -265,7 +264,7 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
                         .fillMaxWidth()
                         .padding(0.dp, 16.dp, 0.dp, 0.dp)
                 ) {
-                    var isRegistered = false
+                    var isRegistered = remember { false }
                     val diverID = remember { diveListViewModel.userID.value }
                     dive.diveDivers.forEach {
                         if (it.diverId == diverID) isRegistered = true
