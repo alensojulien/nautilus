@@ -30,7 +30,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -134,7 +133,7 @@ class Dives {
                     }
                 }
             }
-            items(divesList.size) { index ->
+            items(count = divesList.size, key = { divesList[it].diveId }) { index ->
                 DiveCard(
                     dive = divesList[index],
                     diveIndex = index,
@@ -152,14 +151,11 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
         if (cardExpendedState.value) 250.dp else 0.dp,
         label = "Card expanded height animation"
     )
+    cardExpandedHeight.plus(300.dp)
     val arrowDownOrientation by animateFloatAsState(
         if (cardExpendedState.value) 180f else 0f,
         label = "Arrow orientation animation"
     )
-    if (cardExpendedState.value) {
-        println("Dive index: $diveIndex")
-        diveListViewModel.retrieveDivers(diveIndex = diveIndex)
-    }
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -255,13 +251,7 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
                 ) {
                     if (dive.diveDivers.isEmpty()) {
                         item {
-                            LinearProgressIndicator(
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                trackColor = MaterialTheme.colorScheme.primaryContainer,
-                                modifier = Modifier
-                                    .padding(10.dp, 10.dp)
-                                    .fillMaxWidth()
-                            )
+                            Text(text = "No divers registered yet")
                         }
                     }
                     items(dive.diveDivers.size) { diverIndex ->
@@ -276,13 +266,15 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
                         .padding(0.dp, 16.dp, 0.dp, 0.dp)
                 ) {
                     var isRegistered = false
+                    val diverID = remember { diveListViewModel.userID.value }
                     dive.diveDivers.forEach {
-                        if (it.diverId == diveListViewModel.userID.value) isRegistered = true
+                        if (it.diverId == diverID) isRegistered = true
                     }
 
                     Button(
                         onClick = {
                             diveListViewModel.registerToDive(diveIndex = diveIndex)
+                            cardExpendedState.value = false
                         },
                         enabled = !isRegistered
                     ) {
