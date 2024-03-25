@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,7 +48,6 @@ import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.Dive
 import iut.julien.nautilus.ui.model.DiveListViewModel
 
-
 class Dives {
 
     @Composable
@@ -58,7 +59,6 @@ class Dives {
             return
         }
 
-        diveListViewModel.retrieveDives()
         DivesContent(diveListViewModel = diveListViewModel)
     }
 
@@ -118,20 +118,39 @@ class Dives {
                 Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
                 Spacer(modifier = Modifier.padding(8.dp))
             }
-            items(divesList.size) { index ->
-                DiveCard(divesList[index])
+            if (divesList.isEmpty()) {
+                item {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            trackColor = MaterialTheme.colorScheme.primaryContainer,
+                        )
+                    }
+                }
+            }
+            items(count = divesList.size, key = { divesList[it].diveId }) { index ->
+                DiveCard(
+                    dive = divesList[index],
+                    diveIndex = index,
+                    diveListViewModel = diveListViewModel
+                )
             }
         }
     }
 }
 
 @Composable
-fun DiveCard(dive: Dive) {
+fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
     val cardExpendedState = remember { mutableStateOf(false) }
     val cardExpandedHeight by animateDpAsState(
-        if (cardExpendedState.value) 100.dp else 0.dp,
+        if (cardExpendedState.value) 250.dp else 0.dp,
         label = "Card expanded height animation"
     )
+    cardExpandedHeight.plus(300.dp)
     val arrowDownOrientation by animateFloatAsState(
         if (cardExpendedState.value) 180f else 0f,
         label = "Arrow orientation animation"
@@ -199,20 +218,67 @@ fun DiveCard(dive: Dive) {
                 HorizontalDivider()
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
                     Text(
                         text = "Dive depth: ${dive.diveDepth}m",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                     Text(
                         text = "Number of divers: ${dive.diveNumberDivers}/${dive.diveMaxNumberDivers}",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
+                }
+                HorizontalDivider(
+                    modifier = Modifier.padding(16.dp, 0.dp),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = "List icon")
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(text = "Divers list", style = MaterialTheme.typography.headlineSmall)
+                }
+                LazyColumn(
+                    modifier = Modifier.padding(16.dp, 0.dp)
+                ) {
+                    if (dive.diveDivers.isEmpty()) {
+                        item {
+                            Text(text = "No divers registered yet")
+                        }
+                    }
+                    items(dive.diveDivers.size) { diverIndex ->
+                        val diver = remember { dive.diveDivers[diverIndex] }
+                        Text(text = "${diver.diverFirstName} ${diver.diverName}")
+                    }
+                }
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp, 16.dp, 0.dp, 0.dp)
+                ) {
+                    var isRegistered = remember { false }
+                    val diverID = remember { diveListViewModel.userID.value }
+                    dive.diveDivers.forEach {
+                        if (it.diverId == diverID) isRegistered = true
+                    }
+
+                    Button(
+                        onClick = {
+                            diveListViewModel.registerToDive(diveIndex = diveIndex)
+                            cardExpendedState.value = false
+                        },
+                        enabled = !isRegistered
+                    ) {
+                        Text(text = "Register to this dive")
+                    }
                 }
             }
         }
