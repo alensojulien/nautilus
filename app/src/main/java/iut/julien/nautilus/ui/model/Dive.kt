@@ -7,7 +7,9 @@ data class Dive(
     var diveDepth: String,
     var diveLocation: String,
     var diveNumberDivers: String,
-    var diveMaxNumberDivers: String
+    var diveMaxNumberDivers: String,
+    var diveDivers: ArrayList<Diver> = ArrayList(),
+    var diveDiversID: ArrayList<String> = ArrayList()
 ) {
     override fun toString(): String {
         return "Dive(diveId=$diveId, diveDate='$diveDate', diveTime='$diveTime', diveDepth=$diveDepth, diveLocation='$diveLocation', diveNumberDivers=$diveNumberDivers, diveMaxNumberDivers=$diveMaxNumberDivers)"

@@ -20,6 +20,9 @@ class DiveListViewModel : ViewModel() {
     private val _divesList = MutableLiveData<MutableList<Dive>>(
         mutableStateListOf()
     )
+
+    var userID = MutableLiveData("1")
+
     val divesList = _divesList.asFlow()
 
     fun retrieveDives() {
@@ -75,7 +78,118 @@ class DiveListViewModel : ViewModel() {
                     )
                 }
                 _divesList.postValue(listOfDives)
+                retrieveDivers()
             }
+        }
+    }
+
+    private fun retrieveDivers() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/registration")
+                val responseDivers = StringBuffer()
+                with(url.openConnection() as HttpsURLConnection) {
+                    requestMethod = "GET"
+
+                    BufferedReader(InputStreamReader(inputStream)).use {
+                        var inputLine = it.readLine()
+                        while (inputLine != null) {
+                            responseDivers.append(inputLine)
+                            inputLine = it.readLine()
+                        }
+                        it.close()
+                    }
+                }
+
+                var jsonObject = JSONObject()
+                try {
+                    jsonObject = JSONObject(responseDivers.toString())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                for (i in 0..<jsonObject.getJSONArray("data").length()) {
+                    for (diveIndex in 0..<_divesList.value?.size!!) {
+                        if (_divesList.value?.get(diveIndex)?.diveId == jsonObject.getJSONArray("data")
+                                .getJSONObject(i).getString("DS_CODE")
+                        )
+                            _divesList.value?.get(diveIndex)?.diveDiversID?.add(
+                                jsonObject.getJSONArray("data").getJSONObject(i)
+                                    .getString("US_ID")
+                            )
+                    }
+                }
+                retrieveDiversInfo()
+            }
+        }
+    }
+
+    private fun retrieveDiversInfo() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/user")
+                val responseDivers = StringBuffer()
+                with(url.openConnection() as HttpsURLConnection) {
+                    requestMethod = "GET"
+
+                    BufferedReader(InputStreamReader(inputStream)).use {
+                        var inputLine = it.readLine()
+                        while (inputLine != null) {
+                            responseDivers.append(inputLine)
+                            inputLine = it.readLine()
+                        }
+                        it.close()
+                    }
+                }
+
+                var jsonObject = JSONObject()
+                try {
+                    jsonObject = JSONObject(responseDivers.toString())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                for (i in 0..<jsonObject.getJSONArray("data").length()) {
+                    for (diveIndex in 0..<_divesList.value?.size!!) {
+                        for (diverIndex in 0..<_divesList.value?.get(diveIndex)?.diveDiversID?.size!!) {
+                            if (_divesList.value?.get(diveIndex)?.diveDiversID?.get(diverIndex) == jsonObject.getJSONArray("data")
+                                    .getJSONObject(i).getString("US_ID")
+                            ) {
+                                _divesList.value?.get(diveIndex)?.diveDivers?.add(
+                                    Diver(
+                                        diverId = jsonObject.getJSONArray("data").getJSONObject(i)
+                                            .getString("US_ID"),
+                                        diverPreCode = jsonObject.getJSONArray("data").getJSONObject(i)
+                                            .getString("PRE_CODE"),
+                                        diverFirstName = jsonObject.getJSONArray("data").getJSONObject(i)
+                                            .getString("US_FIRST_NAME"),
+                                        diverName = jsonObject.getJSONArray("data").getJSONObject(i)
+                                            .getString("US_NAME")
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+                _divesList.postValue(_divesList.value)
+            }
+        }
+    }
+
+    fun registerToDive(diveIndex: Int) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val url = URL(
+                    "https://dev-sae301grp3.users.info.unicaen.fr/api/subscribe?US_ID=${userID.value}&DS_CODE=${
+                        _divesList.value?.get(diveIndex)?.diveId
+                    }"
+                )
+                with(url.openConnection() as HttpsURLConnection) {
+                    requestMethod = "POST"
+                    doOutput = true
+                    outputStream.flush()
+                    println("Post response code : $responseCode")
+                }
+            }
+            retrieveDives()
         }
     }
 }
