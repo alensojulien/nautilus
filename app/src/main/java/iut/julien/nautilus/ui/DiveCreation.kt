@@ -69,13 +69,6 @@ class DiveCreation {
             pilote.addAll(listPilote)
             val listSecurity = getUserRole("SECURITY")
             security.addAll(listSecurity)
-
-            println(locationList.toList())
-            println(boatList.toList())
-            println(levelList.toList())
-            println(director.toList())
-            println(pilote.toList())
-            println(security.toList())
         }
         AndroidView(
             factory = { context ->
@@ -141,12 +134,11 @@ class DiveCreation {
                     val dsDirector = getSelectedID(list = director, spinner = directorSpinner)
                     val dsPilot = getSelectedID(list = pilote, spinner = piloteSpinner)
                     val dsSecurity = getSelectedID(list = security, spinner = securitySpinner)
-
+                    val formattedDate = date.text.toString().split("/").reversed().joinToString("/")
 
                     val data =
-                        "DS_DATE=${date.text}&DS_START_TIME=${startTimeSpinner.selectedItem}&LOCATION=${dlId}&BOAT=${boat}&DS_LEVEL=${levelSpinner.selectedItem}&DS_DIRECTOR=${dsDirector}&DS_PILOT=${dsPilot}&DS_SECURITY=${dsSecurity}&DS_MIN_DIVER=${numberDivers.text}&DS_MAX_DIVER=${maxNumberDivers.text}"
+                        "DS_DATE=${formattedDate}&DS_START_TIME=${startTimeSpinner.selectedItem}&LOCATION=${dlId}&BOAT=${boat}&DS_LEVEL=${levelSpinner.selectedItem}&DS_DIRECTOR=${dsDirector}&DS_PILOT=${dsPilot}&DS_SECURITY=${dsSecurity}&DS_MIN_DIVER=${numberDivers.text}&DS_MAX_DIVER=${maxNumberDivers.text}"
                     createDive(data)
-
                 }
                 view
             }
@@ -155,7 +147,6 @@ class DiveCreation {
 
     private fun getSelectedID(list: SnapshotStateList<DatabaseObject>, spinner: Spinner): String {
         for (item in list) {
-            println("${item.name} == ${spinner.selectedItem} =====> ${item.name == spinner.selectedItem}")
             if (item.name == spinner.selectedItem.toString()) {
                 return item.id
             }
@@ -313,7 +304,7 @@ class DiveCreation {
         if (date.isEmpty()) {
             return false
         }
-        if (!date.matches(Regex("([0-9]{2})/([0-9]{2})/([0-9]{4})"))) {
+        if (!date.matches(Regex("^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/[0-9]{2}\$"))) {
             return false
         }
         return true
@@ -331,9 +322,7 @@ class DiveCreation {
                 if (responseCode == 200) {
                     Log.d("DiveCreation", "Dive created")
                 } else {
-                    println(data)
-                    println(url)
-                    println("Error $responseMessage")
+                    Log.d("DiveCreation", "Dive not created")
                 }
             }
         }

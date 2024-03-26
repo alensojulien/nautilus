@@ -6,7 +6,7 @@
     <string name="welcome_logo_desc">Nautilus logo</string>
     <string name="no_internet_connection">No internet connection</string>
     <string name="no_internet_connection_message">Activate your mobile data or connect to a wifi network.</string>
-    <string name="date_de_la_plongee">Date de la plongée (jj/mm/aaaa)</string>
+    <string name="date_de_la_plongee">Date de la plongée (jj/mm/aa)</string>
     <string name="heure_de_la_plongee">Heure de la plongée :</string>
     <string name="lieu_de_la_plongee">Lieu de la plongée :</string>
     <string name="nombre_minimal_plongeurs">Nombre minimal de plongeurs</string>
