@@ -123,7 +123,7 @@ class DiveCreation {
                 val date = view.findViewById<EditText>(R.id.DS_DATE)
                 date.setOnFocusChangeListener { _, _ ->
                     if (!checkDate(date.text.toString())) {
-                        date.error = "The date must be less than the current date"
+                        date.error = "The date entered is invalid"
                     }
                 }
                 val button = view.findViewById<Button>(R.id.CREATE)
