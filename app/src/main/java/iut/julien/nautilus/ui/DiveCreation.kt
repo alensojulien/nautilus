@@ -45,18 +45,21 @@ class DiveCreation {
         }
         LaunchedEffect(Unit) {
             val list = requestToAPIData(
-                URL("https://dev-sae301grp3.users.info.unicaen.fr/api/divinglocation"),
-                "DL_NAME"
+                url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/divinglocation"),
+                id = "DL_ID",
+                name = "DL_NAME"
             )
             locationList.addAll(list)
             val listBoat = requestToAPIData(
-                URL("https://dev-sae301grp3.users.info.unicaen.fr/api/boat"),
-                "BO_NAME"
+                url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/boat"),
+                id = "BO_ID",
+                name = "BO_NAME"
             )
             boatList.addAll(listBoat)
             val listLevel = requestToAPIData(
                 URL("https://dev-sae301grp3.users.info.unicaen.fr/api/prerogative"),
-                "PRE_CODE"
+                id = "PRE_CODE",
+                name = "PRE_CODE"
             )
             levelList.addAll(listLevel)
             val listDirector = getUserRole("DIRECTOR")
@@ -132,7 +135,7 @@ class DiveCreation {
         )
     }
 
-    private suspend fun requestToAPIData(url: URL, name: String): List<String> {
+    private suspend fun requestToAPIData(url: URL, id: String, name: String): List<List<String>> {
         return withContext(Dispatchers.IO) {
             val responseLocation = StringBuffer()
             with(url.openConnection() as HttpsURLConnection) {
@@ -144,14 +147,18 @@ class DiveCreation {
                         inputLine = it.readLine()
                     }
                     it.close()
-                    return@withContext parseList(responseLocation.toString(), name)
+                    return@withContext parseList(
+                        response = responseLocation.toString(),
+                        id = id,
+                        name = name
+                    )
                 }
             }
         }
     }
 
-    private fun parseList(response: String, name: String): List<String> {
-        val locationList = mutableListOf<String>()
+    private fun parseList(response: String, id: String, name: String): List<List<String>> {
+        val locationList: MutableList<MutableList<String>> = mutableListOf()
         var jsonObject = JSONObject()
         try {
             jsonObject = JSONObject(response)
@@ -159,7 +166,13 @@ class DiveCreation {
             e.printStackTrace()
         }
         for (i in 0 until jsonObject.getJSONArray("data").length()) {
-            locationList.add(jsonObject.getJSONArray("data").getJSONObject(i).getString(name))
+
+            locationList.add(
+                mutableListOf(
+                    jsonObject.getJSONArray("data").getJSONObject(i).getString(id),
+                    jsonObject.getJSONArray("data").getJSONObject(i).getString(name)
+                )
+            )
         }
         return locationList
     }
@@ -170,7 +183,7 @@ class DiveCreation {
         spinner.adapter = adapter
     }
 
-    private suspend fun getUserRole(roles: String): MutableList<String> {
+    private suspend fun getUserRole(roles: String): MutableList<MutableList<String>> {
         return withContext(Dispatchers.IO) {
             val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/user")
             val response = StringBuffer()
@@ -186,7 +199,7 @@ class DiveCreation {
                 }
             }
             val role = getRoleAttribution(roles)
-            val user = mutableListOf<String>()
+            val user: MutableList<MutableList<String>> = mutableListOf()
             var json = JSONObject()
             try {
                 json = JSONObject(response.toString())
@@ -197,7 +210,12 @@ class DiveCreation {
             for (i in 0 until json.getJSONArray("data").length()) {
                 val id = json.getJSONArray("data").getJSONObject(i).getString("US_ID")
                 if (role.contains(id)) {
-                    user.add(json.getJSONArray("data").getJSONObject(i).getString("US_NAME"))
+                    user.add(
+                        mutableListOf(
+                            id,
+                            json.getJSONArray("data").getJSONObject(i).getString("US_NAME")
+                        ))
+
                 }
             }
             return@withContext user
