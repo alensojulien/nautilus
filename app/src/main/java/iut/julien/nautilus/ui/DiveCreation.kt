@@ -20,9 +20,7 @@ import java.io.BufferedReader
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import org.json.JSONObject
-import java.io.IOException
 import java.nio.charset.StandardCharsets
-import java.time.LocalDate
 
 class DiveCreation {
     @Composable
@@ -71,6 +69,7 @@ class DiveCreation {
         AndroidView(
             factory = { context ->
                 val view = LayoutInflater.from(context).inflate(R.layout.activity_main, null)
+                val startTimeSpinner = view.findViewById<Spinner>(R.id.DS_START_TIME)
                 val locationSpinner = view.findViewById<Spinner>(R.id.DS_LOCATION)
                 val boatSpinner = view.findViewById<Spinner>(R.id.DS_BOAT)
                 val levelSpinner = view.findViewById<Spinner>(R.id.DS_LEVEL)
@@ -124,7 +123,7 @@ class DiveCreation {
                         ) && checkDate(date.text.toString())
                     ) {
                         val data =
-                            "DS_DATE=${date.text}&DS_LOCATION=${locationSpinner.selectedItem}&DS_BOAT=${boatSpinner.selectedItem}&DS_LEVEL=${levelSpinner.selectedItem}&DS_DIRECTOR=${directorSpinner.selectedItem}&DS_PILOT=${piloteSpinner.selectedItem}&DS_SECURITY=${securitySpinner.selectedItem}&DS_MIN_DIVER=${numberDivers.text}&DS_MAX_DIVER=${maxNumberDivers.text}"
+                            "DS_DATE=${date.text}&DS_START_TIME=${startTimeSpinner.selectedItem}&LOCATION=${locationSpinner.selectedItem}&BOAT=${boatSpinner.selectedItem}&DS_LEVEL=${levelSpinner.selectedItem}&DS_DIRECTOR=${directorSpinner.selectedItem}&DS_PILOT=${piloteSpinner.selectedItem}&DS_SECURITY=${securitySpinner.selectedItem}&DS_MIN_DIVER=${numberDivers.text}&DS_MAX_DIVER=${maxNumberDivers.text}"
                         createDive(data)
                     }
                 }
@@ -272,17 +271,19 @@ class DiveCreation {
     }
 
 
-    private suspend fun sendData(data: String) {
+    private suspend fun postDiveRequest(data: String) {
         return withContext(Dispatchers.IO) {
-            val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/createdive")
+            val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/createdive?$data")
             with(url.openConnection() as HttpsURLConnection) {
                 requestMethod = "POST"
-                doOutput = true
-                outputStream.write(data.toByteArray(StandardCharsets.UTF_8))
-                outputStream.flush()
+//                doOutput = true
+//                outputStream.write(data.toByteArray(StandardCharsets.UTF_8))
+//                outputStream.flush()
                 if (responseCode == 200) {
                     Log.d("DiveCreation", "Dive created")
                 } else {
+                    println(data)
+                    println(url)
                     println("Error $responseMessage")
                 }
             }
@@ -292,9 +293,7 @@ class DiveCreation {
 
     private fun createDive(data: String) {
         (CoroutineScope(Dispatchers.IO)).launch {
-            sendData(data)
+            postDiveRequest(data)
         }
     }
-
-
 }
