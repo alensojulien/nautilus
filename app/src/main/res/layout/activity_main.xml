@@ -1,185 +1,218 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="397dp"
-        android:layout_height="628dp"
-        android:orientation="vertical"
-        android:padding="25dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3">
-
-        <EditText
-            android:id="@+id/DS_DATE"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Date de la plongée (jj/mm/aaaa)"
-            android:inputType="date"
-            android:layout_margin="5dp"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="5dp">
+            android:id="@+id/linearLayout"
+            android:layout_width="397dp"
+            android:layout_height="628dp"
+            android:orientation="vertical"
+            android:padding="25dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView3">
+
             <TextView
+                android:id="@+id/textView3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Heure de la plongée :"
-                android:textSize="20sp"/>
-            <Spinner
-                android:id="@+id/DS_START_TIME"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:entries="@array/start_time_options"/>
-        </LinearLayout>
+                android:layout_marginTop="16dp"
+                android:text="@string/creation_plongee"
+                android:textSize="25sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="5dp">
-            <TextView
-                android:layout_width="wrap_content"
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider"
+                android:layout_marginVertical="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+
+            <EditText
+                android:id="@+id/DS_DATE"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_margin="5dp"
+                android:autofillHints=""
+                android:hint="@string/date_de_la_plongee"
+                android:inputType="date" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Lieu de la plongée :"
-                android:textSize="20sp"/>
-            <Spinner
-                android:id="@+id/DS_LOCATION"
+                android:layout_margin="5dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/heure_de_la_plongee"
+                    android:textSize="20sp" />
+
+                <Spinner
+                    android:id="@+id/DS_START_TIME"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:entries="@array/start_time_options" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:entries="@array/start_time_options"/>
-        </LinearLayout>
-
-        <EditText
-            android:id="@+id/DS_MIN_DIVER"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nombre minimal de plongeurs"
-            android:inputType="number"
-            android:layout_margin="5dp"/>
-
-        <EditText
-            android:id="@+id/DS_MAX_DIVER"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nombre maximal de plongeurs"
-            android:inputType="number"
-            android:layout_margin="5dp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="5dp">
-            <TextView
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bateau :"
-                android:textSize="20sp"/>
-            <Spinner
-                android:id="@+id/DS_BOAT"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:entries="@array/start_time_options"/>
-        </LinearLayout>
+                android:layout_margin="5dp"
+                android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="5dp">
-            <TextView
-                android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lieu_de_la_plongee"
+                    android:textSize="20sp" />
+
+                <Spinner
+                    android:id="@+id/DS_LOCATION"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:entries="@array/start_time_options" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/DS_MIN_DIVER"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_margin="5dp"
+                android:autofillHints=""
+                android:hint="@string/nombre_minimal_plongeurs"
+                android:inputType="number" />
+
+            <EditText
+                android:id="@+id/DS_MAX_DIVER"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_margin="5dp"
+                android:autofillHints=""
+                android:hint="@string/nombre_maximal_plongeurs"
+                android:inputType="number" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Niveau de la plongée :"
-                android:textSize="20sp"/>
-            <Spinner
-                android:id="@+id/DS_LEVEL"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-        </LinearLayout>
+                android:layout_margin="5dp"
+                android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="5dp">
-            <TextView
-                android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bateau"
+                    android:textSize="20sp" />
+
+                <Spinner
+                    android:id="@+id/DS_BOAT"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:entries="@array/start_time_options" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Responsable de la sécurité :"
-                android:textSize="20sp"/>
-            <Spinner
-                android:id="@+id/DS_SECURITY"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-        </LinearLayout>
+                android:layout_margin="5dp"
+                android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="5dp">
-            <TextView
-                android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/niveau_plongee"
+                    android:textSize="20sp" />
+
+                <Spinner
+                    android:id="@+id/DS_LEVEL"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Pilote :"
-                android:textSize="20sp"/>
-            <Spinner
-                android:id="@+id/DS_PILOT"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-        </LinearLayout>
+                android:layout_margin="5dp"
+                android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="5dp">
-            <TextView
-                android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/responsable_securite"
+                    android:textSize="20sp" />
+
+                <Spinner
+                    android:id="@+id/DS_SECURITY"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Directeur de la plongée :"
-                android:textSize="20sp"/>
-            <Spinner
-                android:id="@+id/DS_DIRECTOR"
+                android:layout_margin="5dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pilote"
+                    android:textSize="20sp" />
+
+                <Spinner
+                    android:id="@+id/DS_PILOT"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/directeur_plongee"
+                    android:textSize="20sp" />
+
+                <Spinner
+                    android:id="@+id/DS_DIRECTOR"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/CREATE"
+                android:layout_width="213dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:text="@string/creer_plongee" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="2dp"
+                android:layout_marginTop="28dp"
+                app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView3" />
         </LinearLayout>
-
-        <Button
-            android:id="@+id/CREATE"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Créer une plongée"
-            android:layout_margin="5dp"
-            />
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Création d'une plongée"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="10dp" />
-
-    <Space
-        android:layout_width="0dp"
-        android:layout_height="2dp"
-        android:layout_marginTop="28dp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

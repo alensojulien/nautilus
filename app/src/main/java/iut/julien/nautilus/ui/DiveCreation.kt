@@ -283,7 +283,7 @@ class DiveCreation {
                 if (responseCode == 200) {
                     Log.d("DiveCreation", "Dive created")
                 } else {
-                    Log.d(responseMessage, "Error")
+                    println("Error $responseMessage")
                 }
             }
         }
