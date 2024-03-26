@@ -10,8 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.viewinterop.AndroidView
 import iut.julien.nautilus.R
+import iut.julien.nautilus.ui.model.DatabaseObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,28 +22,27 @@ import java.io.BufferedReader
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import org.json.JSONObject
-import java.nio.charset.StandardCharsets
 
 class DiveCreation {
     @Composable
     fun DiveCreationScreen() {
         val locationList = remember {
-            mutableStateListOf("")
+            mutableStateListOf(DatabaseObject())
         }
         val boatList = remember {
-            mutableStateListOf("")
+            mutableStateListOf(DatabaseObject())
         }
         val levelList = remember {
-            mutableStateListOf("")
+            mutableStateListOf(DatabaseObject())
         }
         val director = remember {
-            mutableStateListOf("")
+            mutableStateListOf(DatabaseObject())
         }
         val security = remember {
-            mutableStateListOf("")
+            mutableStateListOf(DatabaseObject())
         }
         val pilote = remember {
-            mutableStateListOf("")
+            mutableStateListOf(DatabaseObject())
         }
         LaunchedEffect(Unit) {
             val list = requestToAPIData(
@@ -68,6 +69,13 @@ class DiveCreation {
             pilote.addAll(listPilote)
             val listSecurity = getUserRole("SECURITY")
             security.addAll(listSecurity)
+
+            println(locationList.toList())
+            println(boatList.toList())
+            println(levelList.toList())
+            println(director.toList())
+            println(pilote.toList())
+            println(security.toList())
         }
         AndroidView(
             factory = { context ->
@@ -120,22 +128,42 @@ class DiveCreation {
                 }
                 val button = view.findViewById<Button>(R.id.CREATE)
                 button.setOnClickListener {
-                    if (checkNumberDivers(
+                    if (!checkNumberDivers(
                             numberDivers.text.toString(),
                             maxNumberDivers.text.toString()
-                        ) && checkDate(date.text.toString())
+                        ) || !checkDate(date.text.toString())
                     ) {
-                        val data =
-                            "DS_DATE=${date.text}&DS_START_TIME=${startTimeSpinner.selectedItem}&LOCATION=${locationSpinner.selectedItem}&BOAT=${boatSpinner.selectedItem}&DS_LEVEL=${levelSpinner.selectedItem}&DS_DIRECTOR=${directorSpinner.selectedItem}&DS_PILOT=${piloteSpinner.selectedItem}&DS_SECURITY=${securitySpinner.selectedItem}&DS_MIN_DIVER=${numberDivers.text}&DS_MAX_DIVER=${maxNumberDivers.text}"
-                        createDive(data)
+                        return@setOnClickListener
                     }
+
+                    val dlId = getSelectedID(list = locationList, spinner = locationSpinner)
+                    val boat = getSelectedID(list = boatList, spinner = boatSpinner)
+                    val dsDirector = getSelectedID(list = director, spinner = directorSpinner)
+                    val dsPilot = getSelectedID(list = pilote, spinner = piloteSpinner)
+                    val dsSecurity = getSelectedID(list = security, spinner = securitySpinner)
+
+
+                    val data =
+                        "DS_DATE=${date.text}&DS_START_TIME=${startTimeSpinner.selectedItem}&LOCATION=${dlId}&BOAT=${boat}&DS_LEVEL=${levelSpinner.selectedItem}&DS_DIRECTOR=${dsDirector}&DS_PILOT=${dsPilot}&DS_SECURITY=${dsSecurity}&DS_MIN_DIVER=${numberDivers.text}&DS_MAX_DIVER=${maxNumberDivers.text}"
+                    createDive(data)
+
                 }
                 view
             }
         )
     }
 
-    private suspend fun requestToAPIData(url: URL, id: String, name: String): List<List<String>> {
+    private fun getSelectedID(list: SnapshotStateList<DatabaseObject>, spinner: Spinner): String {
+        for (item in list) {
+            println("${item.name} == ${spinner.selectedItem} =====> ${item.name == spinner.selectedItem}")
+            if (item.name == spinner.selectedItem.toString()) {
+                return item.id
+            }
+        }
+        return ""
+    }
+
+    private suspend fun requestToAPIData(url: URL, id: String, name: String): List<DatabaseObject> {
         return withContext(Dispatchers.IO) {
             val responseLocation = StringBuffer()
             with(url.openConnection() as HttpsURLConnection) {
@@ -157,8 +185,8 @@ class DiveCreation {
         }
     }
 
-    private fun parseList(response: String, id: String, name: String): List<List<String>> {
-        val locationList: MutableList<MutableList<String>> = mutableListOf()
+    private fun parseList(response: String, id: String, name: String): List<DatabaseObject> {
+        val locationList: MutableList<DatabaseObject> = mutableListOf()
         var jsonObject = JSONObject()
         try {
             jsonObject = JSONObject(response)
@@ -168,22 +196,22 @@ class DiveCreation {
         for (i in 0 until jsonObject.getJSONArray("data").length()) {
 
             locationList.add(
-                mutableListOf(
-                    jsonObject.getJSONArray("data").getJSONObject(i).getString(id),
-                    jsonObject.getJSONArray("data").getJSONObject(i).getString(name)
+                DatabaseObject(
+                    id = jsonObject.getJSONArray("data").getJSONObject(i).getString(id),
+                    name = jsonObject.getJSONArray("data").getJSONObject(i).getString(name)
                 )
             )
         }
         return locationList
     }
 
-    private fun fillList(spinner: Spinner, list: List<String>) {
+    private fun fillList(spinner: Spinner, list: List<DatabaseObject>) {
         val adapter = ArrayAdapter(spinner.context, android.R.layout.simple_spinner_item, list)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
     }
 
-    private suspend fun getUserRole(roles: String): MutableList<MutableList<String>> {
+    private suspend fun getUserRole(roles: String): MutableList<DatabaseObject> {
         return withContext(Dispatchers.IO) {
             val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/user")
             val response = StringBuffer()
@@ -199,7 +227,7 @@ class DiveCreation {
                 }
             }
             val role = getRoleAttribution(roles)
-            val user: MutableList<MutableList<String>> = mutableListOf()
+            val user: MutableList<DatabaseObject> = mutableListOf()
             var json = JSONObject()
             try {
                 json = JSONObject(response.toString())
@@ -211,10 +239,13 @@ class DiveCreation {
                 val id = json.getJSONArray("data").getJSONObject(i).getString("US_ID")
                 if (role.contains(id)) {
                     user.add(
-                        mutableListOf(
-                            id,
-                            json.getJSONArray("data").getJSONObject(i).getString("US_NAME")
-                        ))
+                        DatabaseObject(
+                            id = id,
+                            name = json.getJSONArray("data").getJSONObject(i)
+                                .getString("US_FIRST_NAME") + " " + json.getJSONArray("data")
+                                .getJSONObject(i).getString("US_NAME").uppercase()
+                        )
+                    )
 
                 }
             }
