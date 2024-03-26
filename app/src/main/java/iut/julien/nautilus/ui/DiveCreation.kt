@@ -46,11 +46,20 @@ class DiveCreation {
             mutableStateListOf("")
         }
         LaunchedEffect(Unit) {
-            val list = requestToAPIData(URL("https://dev-sae301grp3.users.info.unicaen.fr/api/divinglocation"), "DL_NAME")
+            val list = requestToAPIData(
+                URL("https://dev-sae301grp3.users.info.unicaen.fr/api/divinglocation"),
+                "DL_NAME"
+            )
             locationList.addAll(list)
-            val listBoat = requestToAPIData(URL("https://dev-sae301grp3.users.info.unicaen.fr/api/boat"), "BO_NAME")
+            val listBoat = requestToAPIData(
+                URL("https://dev-sae301grp3.users.info.unicaen.fr/api/boat"),
+                "BO_NAME"
+            )
             boatList.addAll(listBoat)
-            val listLevel = requestToAPIData(URL("https://dev-sae301grp3.users.info.unicaen.fr/api/prerogative"), "PRE_CODE")
+            val listLevel = requestToAPIData(
+                URL("https://dev-sae301grp3.users.info.unicaen.fr/api/prerogative"),
+                "PRE_CODE"
+            )
             levelList.addAll(listLevel)
             val listDirector = getUserRole("DIRECTOR")
             director.addAll(listDirector)
@@ -77,30 +86,45 @@ class DiveCreation {
                 val numberDivers = view.findViewById<EditText>(R.id.DS_MIN_DIVER)
                 val maxNumberDivers = view.findViewById<EditText>(R.id.DS_MAX_DIVER)
                 numberDivers.setOnFocusChangeListener { _, _ ->
-                    if(!checkNumberDivers(numberDivers.text.toString(), maxNumberDivers.text.toString())){
-                        numberDivers.error = "The number of divers must be less than the maximum number of divers"
-                    }else{
+                    if (!checkNumberDivers(
+                            numberDivers.text.toString(),
+                            maxNumberDivers.text.toString()
+                        )
+                    ) {
+                        numberDivers.error =
+                            "The number of divers must be less than the maximum number of divers"
+                    } else {
                         maxNumberDivers.error = null
 
                     }
                 }
                 maxNumberDivers.setOnFocusChangeListener { _, _ ->
-                    if(!checkNumberDivers(numberDivers.text.toString(), maxNumberDivers.text.toString())){
-                        maxNumberDivers.error = "The number of divers must be less than the maximum number of divers"
-                    }else{
+                    if (!checkNumberDivers(
+                            numberDivers.text.toString(),
+                            maxNumberDivers.text.toString()
+                        )
+                    ) {
+                        maxNumberDivers.error =
+                            "The number of divers must be less than the maximum number of divers"
+                    } else {
                         numberDivers.error = null
                     }
                 }
                 val date = view.findViewById<EditText>(R.id.DS_DATE)
                 date.setOnFocusChangeListener { _, _ ->
-                    if(!checkDate(date.text.toString())){
+                    if (!checkDate(date.text.toString())) {
                         date.error = "The date must be less than the current date"
                     }
                 }
                 val button = view.findViewById<Button>(R.id.CREATE)
                 button.setOnClickListener {
-                    if(checkNumberDivers(numberDivers.text.toString(), maxNumberDivers.text.toString()) && checkDate(date.text.toString())){
-                        val data = "DS_DATE=${date.text}&DS_LOCATION=${locationSpinner.selectedItem}&DS_BOAT=${boatSpinner.selectedItem}&DS_LEVEL=${levelSpinner.selectedItem}&DS_DIRECTOR=${directorSpinner.selectedItem}&DS_PILOT=${piloteSpinner.selectedItem}&DS_SECURITY=${securitySpinner.selectedItem}&DS_MIN_DIVER=${numberDivers.text}&DS_MAX_DIVER=${maxNumberDivers.text}"
+                    if (checkNumberDivers(
+                            numberDivers.text.toString(),
+                            maxNumberDivers.text.toString()
+                        ) && checkDate(date.text.toString())
+                    ) {
+                        val data =
+                            "DS_DATE=${date.text}&DS_LOCATION=${locationSpinner.selectedItem}&DS_BOAT=${boatSpinner.selectedItem}&DS_LEVEL=${levelSpinner.selectedItem}&DS_DIRECTOR=${directorSpinner.selectedItem}&DS_PILOT=${piloteSpinner.selectedItem}&DS_SECURITY=${securitySpinner.selectedItem}&DS_MIN_DIVER=${numberDivers.text}&DS_MAX_DIVER=${maxNumberDivers.text}"
                         createDive(data)
                     }
                 }
@@ -109,8 +133,8 @@ class DiveCreation {
         )
     }
 
-    private suspend fun requestToAPIData(url: URL, name: String): List<String>{
-        return withContext(Dispatchers.IO){
+    private suspend fun requestToAPIData(url: URL, name: String): List<String> {
+        return withContext(Dispatchers.IO) {
             val responseLocation = StringBuffer()
             with(url.openConnection() as HttpsURLConnection) {
                 requestMethod = "GET"
@@ -130,25 +154,25 @@ class DiveCreation {
     private fun parseList(response: String, name: String): List<String> {
         val locationList = mutableListOf<String>()
         var jsonObject = JSONObject()
-        try{
+        try {
             jsonObject = JSONObject(response)
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        for(i in 0 until jsonObject.getJSONArray("data").length()) {
+        for (i in 0 until jsonObject.getJSONArray("data").length()) {
             locationList.add(jsonObject.getJSONArray("data").getJSONObject(i).getString(name))
         }
         return locationList
     }
 
-    private fun fillList(spinner: Spinner, list: List<String>){
+    private fun fillList(spinner: Spinner, list: List<String>) {
         val adapter = ArrayAdapter(spinner.context, android.R.layout.simple_spinner_item, list)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
     }
 
     private suspend fun getUserRole(roles: String): MutableList<String> {
-        return withContext(Dispatchers.IO){
+        return withContext(Dispatchers.IO) {
             val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/user")
             val response = StringBuffer()
             with(url.openConnection() as HttpsURLConnection) {
@@ -165,15 +189,15 @@ class DiveCreation {
             val role = getRoleAttribution(roles)
             val user = mutableListOf<String>()
             var json = JSONObject()
-            try{
+            try {
                 json = JSONObject(response.toString())
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
 
-            for(i in 0 until json.getJSONArray("data").length()){
+            for (i in 0 until json.getJSONArray("data").length()) {
                 val id = json.getJSONArray("data").getJSONObject(i).getString("US_ID")
-                if(role.contains(id)){
+                if (role.contains(id)) {
                     user.add(json.getJSONArray("data").getJSONObject(i).getString("US_NAME"))
                 }
             }
@@ -182,7 +206,7 @@ class DiveCreation {
     }
 
     private suspend fun getRoleAttribution(roles: String): MutableList<String> {
-       return withContext(Dispatchers.IO){
+        return withContext(Dispatchers.IO) {
             val dataList = mutableListOf<String>()
             val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/roleattribution")
             val response = StringBuffer()
@@ -198,27 +222,29 @@ class DiveCreation {
                 }
             }
             var json = JSONObject()
-            try{
+            try {
                 json = JSONObject(response.toString())
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
-            for(i in 0 until json.getJSONArray("data").length()){
+            for (i in 0 until json.getJSONArray("data").length()) {
                 val role = json.getJSONArray("data").getJSONObject(i).getString("ROL_CODE")
                 val id = json.getJSONArray("data").getJSONObject(i).getString("US_ID")
-                when(roles){
+                when (roles) {
                     "DIRECTOR" -> {
-                        if(role == "DIR"){
+                        if (role == "DIR") {
                             dataList.add(id)
                         }
                     }
+
                     "PILOTE" -> {
-                        if(role == "PIL"){
+                        if (role == "PIL") {
                             dataList.add(id)
                         }
                     }
+
                     "SECURITY" -> {
-                        if(role == "SEC"){
+                        if (role == "SEC") {
                             dataList.add(id)
                         }
                     }
@@ -229,25 +255,25 @@ class DiveCreation {
     }
 
     private fun checkNumberDivers(numberDivers: String, maxNumberDivers: String): Boolean {
-        if(numberDivers.isEmpty() || maxNumberDivers.isEmpty()){
+        if (numberDivers.isEmpty() || maxNumberDivers.isEmpty()) {
             return false
         }
         return numberDivers.toInt() <= maxNumberDivers.toInt()
     }
 
     private fun checkDate(date: String): Boolean {
-        if(date.isEmpty()){
+        if (date.isEmpty()) {
             return false
         }
-        if(!date.matches(Regex("([0-9]{2})/([0-9]{2})/([0-9]{4})"))){
+        if (!date.matches(Regex("([0-9]{2})/([0-9]{2})/([0-9]{4})"))) {
             return false
         }
         return true
     }
 
 
-    private suspend fun sendData(data: String){
-        return withContext(Dispatchers.IO){
+    private suspend fun sendData(data: String) {
+        return withContext(Dispatchers.IO) {
             val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/createdive")
             with(url.openConnection() as HttpsURLConnection) {
                 requestMethod = "POST"
@@ -256,7 +282,7 @@ class DiveCreation {
                 outputStream.flush()
                 if (responseCode == 200) {
                     Log.d("DiveCreation", "Dive created")
-                }else{
+                } else {
                     Log.d(responseMessage, "Error")
                 }
             }
