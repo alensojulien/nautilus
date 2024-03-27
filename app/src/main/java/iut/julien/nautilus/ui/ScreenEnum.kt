@@ -22,7 +22,8 @@ enum class ScreenEnum(
         contentDescription = "Dives"
     ) {
         @Composable
-        override fun GetContent(diveListViewModel: DiveListViewModel) = Dives().DivesScreen(diveListViewModel)
+        override fun GetContent(diveListViewModel: DiveListViewModel) =
+            Dives().DivesScreen(diveListViewModel)
     },
     DiveCreation(
         routeName = "Dive Creation",
@@ -31,7 +32,8 @@ enum class ScreenEnum(
         contentDescription = "Dive Creation"
     ) {
         @Composable
-        override fun GetContent(diveListViewModel: DiveListViewModel) = DiveCreation().DiveCreationScreen()
+        override fun GetContent(diveListViewModel: DiveListViewModel) =
+            DiveCreation().DiveCreationScreen(diveListViewModel = diveListViewModel)
     };
 
     @Composable

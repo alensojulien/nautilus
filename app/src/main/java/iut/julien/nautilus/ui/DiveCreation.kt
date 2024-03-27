@@ -14,6 +14,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.viewinterop.AndroidView
 import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.DatabaseObject
+import iut.julien.nautilus.ui.model.DiveListViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,8 +25,10 @@ import javax.net.ssl.HttpsURLConnection
 import org.json.JSONObject
 
 class DiveCreation {
+    private var diveListViewModel: DiveListViewModel = DiveListViewModel()
     @Composable
-    fun DiveCreationScreen() {
+    fun DiveCreationScreen(diveListViewModel: DiveListViewModel) {
+        this.diveListViewModel = diveListViewModel
         val locationList = remember {
             mutableStateListOf(DatabaseObject())
         }
@@ -316,11 +319,9 @@ class DiveCreation {
             val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/createdive?$data")
             with(url.openConnection() as HttpsURLConnection) {
                 requestMethod = "POST"
-//                doOutput = true
-//                outputStream.write(data.toByteArray(StandardCharsets.UTF_8))
-//                outputStream.flush()
                 if (responseCode == 200) {
                     Log.d("DiveCreation", "Dive created")
+                    diveListViewModel.retrieveDives()
                 } else {
                     Log.d("DiveCreation", "Dive not created")
                 }
