@@ -36,21 +36,10 @@ enum class ScreenEnum(
         @Composable
         override fun GetContent(diveListViewModel: DiveListViewModel) =
             DiveCreation().DiveCreationScreen(diveListViewModel = diveListViewModel)
-    },
-    DiveLiked(
-        routeName = "Dive Liked",
-        icon = Icons.Filled.FavoriteBorder,
-        iconFilled = Icons.Filled.Favorite,
-        contentDescription = "Dive Liked"
-    ) {
-        @Composable
-        override fun GetContent(diveListViewModel: DiveListViewModel) =
-            DiveLiked().DiveLikedScreen(diveListViewModel)
     };
 
     @Composable
     @Override
-    open fun GetContent(diveListViewModel: DiveListViewModel) {
-        return Dives().DivesScreen(diveListViewModel)
-    }
+    open fun GetContent(diveListViewModel: DiveListViewModel) =
+        Dives().DivesScreen(diveListViewModel)
 }
