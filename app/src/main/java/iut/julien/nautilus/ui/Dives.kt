@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Warning
@@ -51,6 +53,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.Dive
 import iut.julien.nautilus.ui.model.DiveListViewModel
+import iut.julien.nautilus.ui.utils.FileStorage
 import kotlinx.coroutines.delay
 
 class Dives {
@@ -129,6 +132,7 @@ class Dives {
     @Composable
     fun DivesContent(diveListViewModel: DiveListViewModel) {
         val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
+        val likedDives = FileStorage.getFavoriteDives(context = LocalContext.current)
         LazyColumn(
             modifier = Modifier
                 .padding(16.dp, 0.dp)
@@ -157,7 +161,9 @@ class Dives {
                 DiveCard(
                     dive = divesList[index],
                     diveIndex = index,
-                    diveListViewModel = diveListViewModel
+                    diveListViewModel = diveListViewModel,
+                    context = LocalContext.current,
+                    likedDives = likedDives
                 )
             }
         }
@@ -165,7 +171,7 @@ class Dives {
 }
 
 @Composable
-fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
+fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel, context: Context, likedDives: List<String>) {
     val cardExpendedState = remember { mutableStateOf(false) }
     val cardExpandedHeight by animateDpAsState(
         if (cardExpendedState.value) 250.dp else 0.dp,
@@ -176,6 +182,7 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
         if (cardExpendedState.value) 180f else 0f,
         label = "Arrow orientation animation"
     )
+    val isLiked = remember { mutableStateOf(likedDives.contains(dive.diveId)) }
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -222,12 +229,35 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
                         )
                     }
                 }
-                IconButton(onClick = { cardExpendedState.value = !cardExpendedState.value }) {
-                    Icon(
-                        Icons.Filled.KeyboardArrowDown,
-                        contentDescription = "Arrow down icon",
-                        modifier = Modifier.rotate(arrowDownOrientation)
-                    )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val icon = remember {
+                        if (isLiked.value) {
+                            mutableStateOf(Icons.Filled.Favorite)
+                        } else {
+                            mutableStateOf(Icons.Filled.FavoriteBorder)
+                        }
+                    }
+                    IconButton(onClick = {
+                        icon.value = if (isLiked.value) {
+                            FileStorage.removeFavoriteDive(diveID = dive.diveId, context = context)
+                            Icons.Filled.FavoriteBorder
+                        } else {
+                            FileStorage.addFavoriteDive(diveID = dive.diveId, context = context)
+                            Icons.Filled.Favorite
+                        }
+                        isLiked.value = !isLiked.value
+                    }) {
+                        Icon(icon.value, contentDescription = "Heart icon")
+                    }
+                    IconButton(onClick = { cardExpendedState.value = !cardExpendedState.value }) {
+                        Icon(
+                            Icons.Filled.KeyboardArrowDown,
+                            contentDescription = "Arrow down icon",
+                            modifier = Modifier.rotate(arrowDownOrientation)
+                        )
+                    }
                 }
             }
             Column(
