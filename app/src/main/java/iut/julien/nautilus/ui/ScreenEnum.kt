@@ -4,6 +4,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.Create
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,6 +36,16 @@ enum class ScreenEnum(
         @Composable
         override fun GetContent(diveListViewModel: DiveListViewModel) =
             DiveCreation().DiveCreationScreen(diveListViewModel = diveListViewModel)
+    },
+    DiveLiked(
+        routeName = "Dive Liked",
+        icon = Icons.Filled.FavoriteBorder,
+        iconFilled = Icons.Filled.Favorite,
+        contentDescription = "Dive Liked"
+    ) {
+        @Composable
+        override fun GetContent(diveListViewModel: DiveListViewModel) =
+            DiveLiked().DiveLikedScreen(diveListViewModel)
     };
 
     @Composable

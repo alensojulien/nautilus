@@ -18,4 +18,5 @@
     <string name="directeur_plongee">Directeur de la plongée :</string>
     <string name="creer_plongee">Créer une plongée</string>
     <string name="creation_plongee">Création d\'une plongée</string>
+    <string name="swipe_down_refresh_msg">Balayez vers le bas pour rafraîchir</string>
 </resources>

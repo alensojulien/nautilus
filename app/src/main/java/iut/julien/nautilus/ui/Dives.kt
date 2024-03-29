@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -47,6 +48,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -139,6 +142,22 @@ class Dives {
                 .fillMaxWidth()
         ) {
             item {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Arrow down icon")
+                    Text(
+                        text = stringResource(R.string.swipe_down_refresh_msg),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontStyle = FontStyle.Italic
+                    )
+                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Arrow down icon")
+                }
+            }
+            item {
                 Spacer(modifier = Modifier.padding(8.dp))
                 Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
                 Spacer(modifier = Modifier.padding(8.dp))
@@ -171,7 +190,13 @@ class Dives {
 }
 
 @Composable
-fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel, context: Context, likedDives: List<String>) {
+fun DiveCard(
+    dive: Dive,
+    diveIndex: Int,
+    diveListViewModel: DiveListViewModel,
+    context: Context,
+    likedDives: List<String>
+) {
     val cardExpendedState = remember { mutableStateOf(false) }
     val cardExpandedHeight by animateDpAsState(
         if (cardExpendedState.value) 250.dp else 0.dp,
