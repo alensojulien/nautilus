@@ -96,10 +96,7 @@ class DiveListViewModel : ViewModel() {
                 listOfDives.sortWith(
                     compareBy(
                         { it.diveDate },
-                        { it.diveLocation },
-                        { it.diveDepth },
-                        { it.diveMaxNumberDivers },
-                        { it.diveNumberDivers })
+                        { it.diveId })
                 )
                 _divesList.postValue(listOfDives)
                 // Allow to retrieve dive participants
