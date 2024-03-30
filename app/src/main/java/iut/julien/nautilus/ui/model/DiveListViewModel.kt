@@ -17,15 +17,30 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.net.ssl.HttpsURLConnection
 
+/**
+ * ViewModel for the DiveListFragment.
+ */
 class DiveListViewModel : ViewModel() {
+    /**
+     * List of dives retrieved.
+     */
     private val _divesList = MutableLiveData<MutableList<Dive>>(
         mutableStateListOf()
     )
 
+    /**
+     * User ID.
+     */
     var userID = MutableLiveData("1")
 
+    /**
+     * Flow of the list of dives.
+     */
     val divesList = _divesList.asFlow()
 
+    /**
+     * Retrieve the list of dives.
+     */
     fun retrieveDives() {
         viewModelScope.launch {
             val listOfDives: MutableList<Dive> = mutableStateListOf()
@@ -87,11 +102,15 @@ class DiveListViewModel : ViewModel() {
                         { it.diveNumberDivers })
                 )
                 _divesList.postValue(listOfDives)
+                // Allow to retrieve dive participants
                 retrieveDivers()
             }
         }
     }
 
+    /**
+     * Retrieve the divers for each dive. (US_ID only)
+     */
     private fun retrieveDivers() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -127,11 +146,15 @@ class DiveListViewModel : ViewModel() {
                             )
                     }
                 }
+                // Makes the link between US_ID and the diver's information
                 retrieveDiversInfo()
             }
         }
     }
 
+    /**
+     * Retrieve the divers' information. (name, firstname, ...)
+     */
     private fun retrieveDiversInfo() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -187,6 +210,11 @@ class DiveListViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Register to a dive.
+     *
+     * @param diveID Dive ID.
+     */
     fun registerToDive(diveID: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
