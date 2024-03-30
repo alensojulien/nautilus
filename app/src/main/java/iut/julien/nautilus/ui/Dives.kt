@@ -414,7 +414,7 @@ fun DiveCard(
                     Button(
                         onClick = {
                             diveListViewModel.registerToDive(diveID = dive.diveId)
-                            cardExpendedState.value = false
+                            expandedCardId.value = ""
                         },
                         enabled = !isRegistered
                     ) {
