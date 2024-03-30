@@ -77,6 +77,14 @@ class DiveListViewModel : ViewModel() {
                         )
                     )
                 }
+                listOfDives.sortWith(
+                    compareBy(
+                        { it.diveDate },
+                        { it.diveLocation },
+                        { it.diveDepth },
+                        { it.diveMaxNumberDivers },
+                        { it.diveNumberDivers })
+                )
                 _divesList.postValue(listOfDives)
                 retrieveDivers()
             }
@@ -150,16 +158,20 @@ class DiveListViewModel : ViewModel() {
                 for (i in 0..<jsonObject.getJSONArray("data").length()) {
                     for (diveIndex in 0..<_divesList.value?.size!!) {
                         for (diverIndex in 0..<_divesList.value?.get(diveIndex)?.diveDiversID?.size!!) {
-                            if (_divesList.value?.get(diveIndex)?.diveDiversID?.get(diverIndex) == jsonObject.getJSONArray("data")
+                            if (_divesList.value?.get(diveIndex)?.diveDiversID?.get(diverIndex) == jsonObject.getJSONArray(
+                                    "data"
+                                )
                                     .getJSONObject(i).getString("US_ID")
                             ) {
                                 _divesList.value?.get(diveIndex)?.diveDivers?.add(
                                     Diver(
                                         diverId = jsonObject.getJSONArray("data").getJSONObject(i)
                                             .getString("US_ID"),
-                                        diverPreCode = jsonObject.getJSONArray("data").getJSONObject(i)
+                                        diverPreCode = jsonObject.getJSONArray("data")
+                                            .getJSONObject(i)
                                             .getString("PRE_CODE"),
-                                        diverFirstName = jsonObject.getJSONArray("data").getJSONObject(i)
+                                        diverFirstName = jsonObject.getJSONArray("data")
+                                            .getJSONObject(i)
                                             .getString("US_FIRST_NAME"),
                                         diverName = jsonObject.getJSONArray("data").getJSONObject(i)
                                             .getString("US_NAME")
@@ -174,12 +186,12 @@ class DiveListViewModel : ViewModel() {
         }
     }
 
-    fun registerToDive(diveIndex: Int) {
+    fun registerToDive(diveID: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val url = URL(
                     "https://dev-sae301grp3.users.info.unicaen.fr/api/subscribe?US_ID=${userID.value}&DS_CODE=${
-                        _divesList.value?.get(diveIndex)?.diveId
+                        diveID
                     }"
                 )
                 with(url.openConnection() as HttpsURLConnection) {
@@ -188,7 +200,9 @@ class DiveListViewModel : ViewModel() {
                     outputStream.flush()
                     println("Post response code : $responseCode")
                 }
+                println(url)
             }
+            println("Registered to dive $diveID")
             retrieveDives()
         }
     }

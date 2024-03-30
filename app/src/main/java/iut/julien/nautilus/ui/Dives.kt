@@ -14,12 +14,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Warning
@@ -27,26 +31,36 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.Dive
 import iut.julien.nautilus.ui.model.DiveListViewModel
+import iut.julien.nautilus.ui.utils.FileStorage
+import kotlinx.coroutines.delay
 
 class Dives {
 
@@ -59,7 +73,23 @@ class Dives {
             return
         }
 
-        DivesContent(diveListViewModel = diveListViewModel)
+        var refreshing by remember { mutableStateOf(false) }
+        LaunchedEffect(refreshing) {
+            if (refreshing) {
+                delay(3000)
+                refreshing = false
+            }
+        }
+
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing = refreshing),
+            onRefresh = {
+                refreshing = true
+                diveListViewModel.retrieveDives()
+            }
+        ) {
+            DivesContent(diveListViewModel = diveListViewModel)
+        }
     }
 
     @Composable
@@ -108,15 +138,48 @@ class Dives {
     @Composable
     fun DivesContent(diveListViewModel: DiveListViewModel) {
         val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
+        val expandedCardId = remember { mutableStateOf("") }
+        val likedDives = FileStorage.getFavoriteDives(context = LocalContext.current)
+        divesList.forEach { likedDive ->
+            likedDive.isLiked = likedDives.contains(likedDive.diveId)
+        }
+        val onlyDisplayLikedDives = remember { mutableStateOf(false) }
         LazyColumn(
             modifier = Modifier
                 .padding(16.dp, 0.dp)
                 .fillMaxWidth()
         ) {
             item {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Arrow down icon")
+                    Text(
+                        text = stringResource(R.string.swipe_down_refresh_msg),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontStyle = FontStyle.Italic
+                    )
+                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Arrow down icon")
+                }
+            }
+            item {
                 Spacer(modifier = Modifier.padding(8.dp))
                 Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
                 Spacer(modifier = Modifier.padding(8.dp))
+            }
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp, 0.dp)
+                ) {
+                    LikedDivesFilterChip(selected = onlyDisplayLikedDives)
+                }
             }
             if (divesList.isEmpty()) {
                 item {
@@ -132,11 +195,30 @@ class Dives {
                     }
                 }
             }
-            items(count = divesList.size, key = { divesList[it].diveId }) { index ->
+            val filteredDivesList = divesList.filter { if (onlyDisplayLikedDives.value) it.isLiked else true }
+            if (filteredDivesList.isEmpty()) {
+                item {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = stringResource(R.string.no_liked_dives_to_display_msg),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+            }
+            items(
+                count = filteredDivesList.size,
+                key = { filteredDivesList[it].diveId }) { index ->
                 DiveCard(
-                    dive = divesList[index],
-                    diveIndex = index,
-                    diveListViewModel = diveListViewModel
+                    dive = filteredDivesList[index],
+                    diveListViewModel = diveListViewModel,
+                    expandedCardId = expandedCardId,
+                    context = LocalContext.current
                 )
             }
         }
@@ -144,10 +226,40 @@ class Dives {
 }
 
 @Composable
-fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
+fun LikedDivesFilterChip(selected: MutableState<Boolean>) {
+    FilterChip(
+        onClick = { selected.value = !selected.value },
+        label = {
+            Text(stringResource(R.string.liked_dives_filter))
+        },
+        selected = selected.value,
+        leadingIcon = if (selected.value) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Done,
+                    contentDescription = "Done icon",
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            }
+        } else {
+            null
+        }
+    )
+}
+
+@Composable
+fun DiveCard(
+    dive: Dive,
+    diveListViewModel: DiveListViewModel,
+    expandedCardId: MutableState<String>,
+    context: Context
+) {
     val cardExpendedState = remember { mutableStateOf(false) }
+    LaunchedEffect(expandedCardId.value) {
+        cardExpendedState.value = expandedCardId.value == dive.diveId
+    }
     val cardExpandedHeight by animateDpAsState(
-        if (cardExpendedState.value) 250.dp else 0.dp,
+        if (cardExpendedState.value) 264.dp else 0.dp,
         label = "Card expanded height animation"
     )
     cardExpandedHeight.plus(300.dp)
@@ -201,12 +313,36 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
                         )
                     }
                 }
-                IconButton(onClick = { cardExpendedState.value = !cardExpendedState.value }) {
-                    Icon(
-                        Icons.Filled.KeyboardArrowDown,
-                        contentDescription = "Arrow down icon",
-                        modifier = Modifier.rotate(arrowDownOrientation)
-                    )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val icon = remember {
+                        if (dive.isLiked) {
+                            mutableStateOf(Icons.Filled.Favorite)
+                        } else {
+                            mutableStateOf(Icons.Filled.FavoriteBorder)
+                        }
+                    }
+                    IconButton(onClick = {
+                        icon.value = if (dive.isLiked) {
+                            FileStorage.removeFavoriteDive(diveID = dive.diveId, context = context)
+                            dive.isLiked = false
+                            Icons.Filled.FavoriteBorder
+                        } else {
+                            FileStorage.addFavoriteDive(diveID = dive.diveId, context = context)
+                            dive.isLiked = true
+                            Icons.Filled.Favorite
+                        }
+                    }) {
+                        Icon(icon.value, contentDescription = "Heart icon")
+                    }
+                    IconButton(onClick = { expandedCardId.value = if (cardExpendedState.value) "" else dive.diveId }) {
+                        Icon(
+                            Icons.Filled.KeyboardArrowDown,
+                            contentDescription = "Arrow down icon",
+                            modifier = Modifier.rotate(arrowDownOrientation)
+                        )
+                    }
                 }
             }
             Column(
@@ -246,7 +382,9 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
                     Text(text = "Divers list", style = MaterialTheme.typography.headlineSmall)
                 }
                 LazyColumn(
-                    modifier = Modifier.padding(16.dp, 0.dp)
+                    modifier = Modifier
+                        .padding(16.dp, 0.dp)
+                        .height(64.dp)
                 ) {
                     if (dive.diveDivers.isEmpty()) {
                         item {
@@ -255,7 +393,7 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
                     }
                     items(dive.diveDivers.size) { diverIndex ->
                         val diver = remember { dive.diveDivers[diverIndex] }
-                        Text(text = "${diver.diverFirstName} ${diver.diverName}")
+                        Text(text = "${diverIndex+1}. ${diver.diverFirstName} ${diver.diverName.uppercase()}")
                     }
                 }
                 Row(
@@ -272,7 +410,7 @@ fun DiveCard(dive: Dive, diveIndex: Int, diveListViewModel: DiveListViewModel) {
 
                     Button(
                         onClick = {
-                            diveListViewModel.registerToDive(diveIndex = diveIndex)
+                            diveListViewModel.registerToDive(diveID = dive.diveId)
                             cardExpendedState.value = false
                         },
                         enabled = !isRegistered
