@@ -69,11 +69,20 @@ class MainActivity : ComponentActivity() {
  */
 @Composable
 fun NautilusApp(modifier: Modifier = Modifier) {
+    // View model
     val diveListViewModel: DiveListViewModel = viewModel()
     diveListViewModel.retrieveDives()
+
+    // Preferences
+    val context: Context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager(context) }
+    val storedUserID = remember { mutableStateOf(preferencesManager.getData("userID", "1")) }
+    diveListViewModel.userID.value = storedUserID.value
+
+    // Navigation
     val navController = rememberNavController()
     val selectedScreen = remember { mutableIntStateOf(0) }
-    val displayIDSettings = remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             AppTopBar(selectedScreen = selectedScreen)
