@@ -234,7 +234,7 @@ class Dives {
             if (onlyDisplayLikedDives.value) {
                 // Display the dives list filtered by liked dives
                 filteredDivesList =
-                    divesList.filter { if (onlyDisplayLikedDives.value) it.isLiked else true }
+                    divesList.filter { it.isLiked }
                 if (filteredDivesList.isEmpty()) {
                     item {
                         Column(
@@ -252,12 +252,12 @@ class Dives {
                 }
             }
 
-            // Display the dives list unfiltered
+            // Display the dives list
             items(
                 count = filteredDivesList.size,
                 key = { filteredDivesList[it].diveId }) { index ->
                 DiveCard(
-                    dive = filteredDivesList[index],
+                    diveAttr = filteredDivesList[index],
                     diveListViewModel = diveListViewModel,
                     expandedCardId = expandedCardId,
                     context = LocalContext.current
@@ -304,11 +304,12 @@ class Dives {
      */
     @Composable
     fun DiveCard(
-        dive: Dive,
+        diveAttr: Dive,
         diveListViewModel: DiveListViewModel,
         expandedCardId: MutableState<String>,
         context: Context
     ) {
+        val dive = remember { diveAttr }
         val cardExpendedState = remember { mutableStateOf(false) }
         LaunchedEffect(expandedCardId.value) {
             cardExpendedState.value = expandedCardId.value == dive.diveId
