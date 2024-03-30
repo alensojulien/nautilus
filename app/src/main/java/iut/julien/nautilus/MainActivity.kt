@@ -107,6 +107,10 @@ fun NautilusApp(modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * A top bar for the app
+ * @param selectedScreen MutableIntState for the selected screen
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopBar(

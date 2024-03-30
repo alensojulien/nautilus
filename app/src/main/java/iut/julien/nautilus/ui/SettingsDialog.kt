@@ -26,7 +26,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import iut.julien.nautilus.ui.model.DiveListViewModel
 
+/**
+ * SettingsDialog is a class that contains the IDSettingsScreen composable function.
+ * This function is used to display a dialog that allows the user to change their user ID.
+ */
 class SettingsDialog {
+
+    /**
+     * IDSettingsScreen is a composable function that displays a dialog that allows the user to change their user ID.
+     * @param displayIDSettings A MutableState that represents whether the dialog should be displayed or not.
+     * @param diveListViewModel The DiveListViewModel that contains the user ID.
+     */
     @Composable
     fun IDSettingsScreen(
         displayIDSettings: MutableState<Boolean>, diveListViewModel: DiveListViewModel

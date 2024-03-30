@@ -62,12 +62,21 @@ import iut.julien.nautilus.ui.model.DiveListViewModel
 import iut.julien.nautilus.ui.utils.FileStorage
 import kotlinx.coroutines.delay
 
+/**
+ * Dives list screen composable
+ */
 class Dives {
 
+    /**
+     * Dives screen composable
+     *
+     * @param diveListViewModel the view model to retrieve dives
+     */
     @Composable
     fun DivesScreen(diveListViewModel: DiveListViewModel) {
         val openDialog = remember { mutableStateOf(true) }
 
+        // Check if the user is online
         if (!isOnline(LocalContext.current) && openDialog.value) {
             InternetConnectionAlertDialog(openDialog)
             return
@@ -92,6 +101,11 @@ class Dives {
         }
     }
 
+    /**
+     * Internet connection alert dialog composable
+     *
+     * @param openDialog the state of the dialog
+     */
     @Composable
     private fun InternetConnectionAlertDialog(openDialog: MutableState<Boolean>) {
         AlertDialog(
@@ -115,6 +129,12 @@ class Dives {
             })
     }
 
+    /**
+     * Check if the user is online
+     *
+     * @param context the context
+     * @return true if the user is online, false otherwise
+     */
     private fun isOnline(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -135,8 +155,14 @@ class Dives {
         return false
     }
 
+    /**
+     * Dives content composable
+     *
+     * @param diveListViewModel the view model to retrieve dives
+     */
     @Composable
     fun DivesContent(diveListViewModel: DiveListViewModel) {
+        // Retrieve the list of dives
         val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
         val expandedCardId = remember { mutableStateOf("") }
         val likedDives = FileStorage.getFavoriteDives(context = LocalContext.current)
@@ -149,6 +175,7 @@ class Dives {
                 .padding(16.dp, 0.dp)
                 .fillMaxWidth()
         ) {
+            // Display the swipe down refresh message
             item {
                 Row(
                     horizontalArrangement = Arrangement.Center,
@@ -165,11 +192,15 @@ class Dives {
                     Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Arrow down icon")
                 }
             }
+
+            // Display the dives list title
             item {
                 Spacer(modifier = Modifier.padding(8.dp))
                 Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
                 Spacer(modifier = Modifier.padding(8.dp))
             }
+
+            // Display the liked dives filter chip
             item {
                 Row(
                     horizontalArrangement = Arrangement.Start,
@@ -181,6 +212,8 @@ class Dives {
                     LikedDivesFilterChip(selected = onlyDisplayLikedDives)
                 }
             }
+
+            // Display the dive loading progress indicator
             if (divesList.isEmpty()) {
                 item {
                     Row(
@@ -195,23 +228,30 @@ class Dives {
                     }
                 }
             }
-            val filteredDivesList =
-                divesList.filter { if (onlyDisplayLikedDives.value) it.isLiked else true }
-            if (filteredDivesList.isEmpty()) {
-                item {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = stringResource(R.string.no_liked_dives_to_display_msg),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+
+            var filteredDivesList = divesList
+            if (onlyDisplayLikedDives.value) {
+                // Display the dives list filtered by liked dives
+                filteredDivesList =
+                    divesList.filter { if (onlyDisplayLikedDives.value) it.isLiked else true }
+                if (filteredDivesList.isEmpty()) {
+                    item {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = stringResource(R.string.no_liked_dives_to_display_msg),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
                 }
             }
+
+            // Display the dives list unfiltered
             items(
                 count = filteredDivesList.size,
                 key = { filteredDivesList[it].diveId }) { index ->
@@ -222,203 +262,221 @@ class Dives {
                     context = LocalContext.current
                 )
             }
+
         }
     }
-}
 
-@Composable
-fun LikedDivesFilterChip(selected: MutableState<Boolean>) {
-    FilterChip(
-        onClick = { selected.value = !selected.value },
-        label = {
-            Text(stringResource(R.string.liked_dives_filter))
-        },
-        selected = selected.value,
-        leadingIcon = if (selected.value) {
-            {
-                Icon(
-                    imageVector = Icons.Filled.Done,
-                    contentDescription = "Done icon",
-                    modifier = Modifier.size(FilterChipDefaults.IconSize)
-                )
-            }
-        } else {
-            null
-        }
-    )
-}
-
-@Composable
-fun DiveCard(
-    dive: Dive,
-    diveListViewModel: DiveListViewModel,
-    expandedCardId: MutableState<String>,
-    context: Context
-) {
-    val cardExpendedState = remember { mutableStateOf(false) }
-    LaunchedEffect(expandedCardId.value) {
-        cardExpendedState.value = expandedCardId.value == dive.diveId
-    }
-    val cardExpandedHeight by animateDpAsState(
-        if (cardExpendedState.value) 264.dp else 0.dp,
-        label = "Card expanded height animation"
-    )
-    cardExpandedHeight.plus(300.dp)
-    val arrowDownOrientation by animateFloatAsState(
-        if (cardExpendedState.value) 180f else 0f,
-        label = "Arrow orientation animation"
-    )
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .background(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer
-            )
-            .fillMaxWidth()
-    ) {
-        Column {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(16.dp)
+    /**
+     * Liked dives filter chip composable
+     *
+     * @param selected the state of the chip
+     */
+    @Composable
+    fun LikedDivesFilterChip(selected: MutableState<Boolean>) {
+        FilterChip(
+            onClick = { selected.value = !selected.value },
+            label = {
+                Text(stringResource(R.string.liked_dives_filter))
+            },
+            selected = selected.value,
+            leadingIcon = if (selected.value) {
+                {
+                    Icon(
+                        imageVector = Icons.Filled.Done,
+                        contentDescription = "Done icon",
+                        modifier = Modifier.size(FilterChipDefaults.IconSize)
                     )
-                    .padding(16.dp)
-                    .fillMaxWidth()
-            ) {
-                Column {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Filled.LocationOn, contentDescription = "Location icon")
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = dive.diveLocation,
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Filled.DateRange, contentDescription = "Date icon")
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = dive.diveDate,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
                 }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val icon = remember {
-                        if (dive.isLiked) {
-                            mutableStateOf(Icons.Filled.Favorite)
-                        } else {
-                            mutableStateOf(Icons.Filled.FavoriteBorder)
-                        }
-                    }
-                    IconButton(onClick = {
-                        icon.value = if (dive.isLiked) {
-                            FileStorage.removeFavoriteDive(diveID = dive.diveId, context = context)
-                            dive.isLiked = false
-                            Icons.Filled.FavoriteBorder
-                        } else {
-                            FileStorage.addFavoriteDive(diveID = dive.diveId, context = context)
-                            dive.isLiked = true
-                            Icons.Filled.Favorite
-                        }
-                    }) {
-                        Icon(icon.value, contentDescription = "Heart icon")
-                    }
-                    IconButton(onClick = {
-                        expandedCardId.value = if (cardExpendedState.value) "" else dive.diveId
-                    }) {
-                        Icon(
-                            Icons.Filled.KeyboardArrowDown,
-                            contentDescription = "Arrow down icon",
-                            modifier = Modifier.rotate(arrowDownOrientation)
-                        )
-                    }
-                }
+            } else {
+                null
             }
-            Column(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                    .fillMaxWidth()
-                    .height(cardExpandedHeight)
-            ) {
-                HorizontalDivider()
+        )
+    }
+
+    /**
+     * Dive card composable
+     *
+     * @param dive the dive to display
+     * @param diveListViewModel the view model to retrieve dives
+     * @param expandedCardId the state of the expanded card
+     * @param context the context
+     */
+    @Composable
+    fun DiveCard(
+        dive: Dive,
+        diveListViewModel: DiveListViewModel,
+        expandedCardId: MutableState<String>,
+        context: Context
+    ) {
+        val cardExpendedState = remember { mutableStateOf(false) }
+        LaunchedEffect(expandedCardId.value) {
+            cardExpendedState.value = expandedCardId.value == dive.diveId
+        }
+        val cardExpandedHeight by animateDpAsState(
+            if (cardExpendedState.value) 264.dp else 0.dp,
+            label = "Card expanded height animation"
+        )
+        cardExpandedHeight.plus(300.dp)
+        val arrowDownOrientation by animateFloatAsState(
+            if (cardExpendedState.value) 180f else 0f,
+            label = "Arrow orientation animation"
+        )
+        Card(
+            modifier = Modifier
+                .padding(8.dp)
+                .background(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer
+                )
+                .fillMaxWidth()
+        ) {
+            Column {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "Dive depth: ${dive.diveDepth}m",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Text(
-                        text = "Number of divers: ${dive.diveNumberDivers}/${dive.diveMaxNumberDivers}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                }
-                HorizontalDivider(
-                    modifier = Modifier.padding(16.dp, 0.dp),
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-                Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = "List icon")
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = "Divers list", style = MaterialTheme.typography.headlineSmall)
-                }
-                LazyColumn(
                     modifier = Modifier
-                        .padding(16.dp, 0.dp)
-                        .height(64.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .padding(16.dp)
+                        .fillMaxWidth()
                 ) {
-                    if (dive.diveDivers.isEmpty()) {
-                        item {
-                            Text(text = "No divers registered yet")
+                    Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Filled.LocationOn, contentDescription = "Location icon")
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = dive.diveLocation,
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Filled.DateRange, contentDescription = "Date icon")
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = dive.diveDate,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
                         }
                     }
-                    items(dive.diveDivers.size) { diverIndex ->
-                        val diver = remember { dive.diveDivers[diverIndex] }
-                        Text(text = "${diverIndex + 1}. ${diver.diverFirstName} ${diver.diverName.uppercase()}")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val icon = remember {
+                            if (dive.isLiked) {
+                                mutableStateOf(Icons.Filled.Favorite)
+                            } else {
+                                mutableStateOf(Icons.Filled.FavoriteBorder)
+                            }
+                        }
+                        IconButton(onClick = {
+                            icon.value = if (dive.isLiked) {
+                                FileStorage.removeFavoriteDive(
+                                    diveID = dive.diveId,
+                                    context = context
+                                )
+                                dive.isLiked = false
+                                Icons.Filled.FavoriteBorder
+                            } else {
+                                FileStorage.addFavoriteDive(diveID = dive.diveId, context = context)
+                                dive.isLiked = true
+                                Icons.Filled.Favorite
+                            }
+                        }) {
+                            Icon(icon.value, contentDescription = "Heart icon")
+                        }
+                        IconButton(onClick = {
+                            expandedCardId.value = if (cardExpendedState.value) "" else dive.diveId
+                        }) {
+                            Icon(
+                                Icons.Filled.KeyboardArrowDown,
+                                contentDescription = "Arrow down icon",
+                                modifier = Modifier.rotate(arrowDownOrientation)
+                            )
+                        }
                     }
                 }
-                Row(
-                    horizontalArrangement = Arrangement.Center,
+                // Display the expanded card content
+                Column(
                     modifier = Modifier
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
                         .fillMaxWidth()
-                        .padding(0.dp, 16.dp, 0.dp, 0.dp)
+                        .height(cardExpandedHeight)
                 ) {
-                    var isRegistered = remember { false }
-                    val diverID = remember { diveListViewModel.userID.value }
-                    dive.diveDivers.forEach {
-                        if (it.diverId == diverID) isRegistered = true
-                    }
-
-                    Button(
-                        onClick = {
-                            diveListViewModel.registerToDive(diveID = dive.diveId)
-                            expandedCardId.value = ""
-                        },
-                        enabled = !isRegistered
+                    HorizontalDivider()
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     ) {
-                        Text(text = "Register to this dive")
+                        Text(
+                            text = "Dive depth: ${dive.diveDepth}m",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            text = "Number of divers: ${dive.diveNumberDivers}/${dive.diveMaxNumberDivers}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier.padding(16.dp, 0.dp),
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.List, contentDescription = "List icon")
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(text = "Divers list", style = MaterialTheme.typography.headlineSmall)
+                    }
+                    LazyColumn(
+                        modifier = Modifier
+                            .padding(16.dp, 0.dp)
+                            .height(64.dp)
+                    ) {
+                        if (dive.diveDivers.isEmpty()) {
+                            item {
+                                Text(text = "No divers registered yet")
+                            }
+                        }
+                        items(dive.diveDivers.size) { diverIndex ->
+                            val diver = remember { dive.diveDivers[diverIndex] }
+                            Text(text = "${diverIndex + 1}. ${diver.diverFirstName} ${diver.diverName.uppercase()}")
+                        }
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(0.dp, 16.dp, 0.dp, 0.dp)
+                    ) {
+                        var isRegistered = remember { false }
+                        val diverID = remember { diveListViewModel.userID.value }
+                        dive.diveDivers.forEach {
+                            if (it.diverId == diverID) isRegistered = true
+                        }
+
+                        Button(
+                            onClick = {
+                                diveListViewModel.registerToDive(diveID = dive.diveId)
+                                expandedCardId.value = ""
+                            },
+                            enabled = !isRegistered
+                        ) {
+                            Text(text = "Register to this dive")
+                        }
                     }
                 }
             }

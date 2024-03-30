@@ -9,12 +9,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import iut.julien.nautilus.ui.model.DiveListViewModel
 
+/**
+ * Enum class that represents the different screens of the app.
+ *
+ * @param routeName The name of the route
+ * @param icon The icon of the screen
+ * @param iconFilled The icon of the screen when it is selected
+ * @param contentDescription The content description of the screen
+ */
 enum class ScreenEnum(
     val routeName: String = "",
     val icon: ImageVector,
     val iconFilled: ImageVector,
     val contentDescription: String = ""
 ) {
+    /**
+     * The Dives list screen.
+     */
     Dives(
         routeName = "Dives",
         icon = Icons.AutoMirrored.Outlined.List,
@@ -25,6 +36,9 @@ enum class ScreenEnum(
         override fun GetContent(diveListViewModel: DiveListViewModel) =
             Dives().DivesScreen(diveListViewModel)
     },
+    /**
+     * The Dive creation screen.
+     */
     DiveCreation(
         routeName = "Dive Creation",
         icon = Icons.Outlined.Create,
@@ -36,6 +50,11 @@ enum class ScreenEnum(
             DiveCreation().DiveCreationScreen(diveListViewModel = diveListViewModel)
     };
 
+    /**
+     * Function that returns the content of the screen.
+     *
+     * @param diveListViewModel The view model of the dives list
+     */
     @Composable
     @Override
     open fun GetContent(diveListViewModel: DiveListViewModel) =

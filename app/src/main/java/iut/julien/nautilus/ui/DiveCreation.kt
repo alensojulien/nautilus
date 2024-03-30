@@ -26,8 +26,20 @@ import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import org.json.JSONObject
 
+/**
+ * DiveCreation class used to display the dive creation screen
+ */
 class DiveCreation {
+    /**
+     * DiveListViewModel used to retrieve the dives
+     */
     private var diveListViewModel: DiveListViewModel = DiveListViewModel()
+
+    /**
+     * DiveCreationScreen used to display the dive creation screen
+     *
+     * @param diveListViewModel DiveListViewModel used to retrieve the dives
+     */
     @Composable
     fun DiveCreationScreen(diveListViewModel: DiveListViewModel) {
         this.diveListViewModel = diveListViewModel
@@ -75,6 +87,7 @@ class DiveCreation {
             val listSecurity = getUserRole("SECURITY")
             security.addAll(listSecurity)
         }
+        // Display the view dive creation screen
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
@@ -151,6 +164,13 @@ class DiveCreation {
         )
     }
 
+    /**
+     * getSelectedID used to get the selected ID in a dropdown menu
+     *
+     * @param list List of DatabaseObject used to get the ID
+     * @param spinner Spinner used to get the selected item
+     * @return String
+     */
     private fun getSelectedID(list: SnapshotStateList<DatabaseObject>, spinner: Spinner): String {
         for (item in list) {
             if (item.name == spinner.selectedItem.toString()) {
@@ -160,6 +180,14 @@ class DiveCreation {
         return ""
     }
 
+    /**
+     * requestToAPIData used to request data from the API
+     *
+     * @param url URL used to request the data
+     * @param id ID used to get the ID from the JSON response
+     * @param name Name used to get the name of the object from the JSON response
+     * @return List of DatabaseObject
+     */
     private suspend fun requestToAPIData(url: URL, id: String, name: String): List<DatabaseObject> {
         return withContext(Dispatchers.IO) {
             val responseLocation = StringBuffer()
@@ -182,6 +210,14 @@ class DiveCreation {
         }
     }
 
+    /**
+     * parseList used to parse the JSON response
+     *
+     * @param response JSON response
+     * @param id ID used to get the ID from the JSON response
+     * @param name Name used to get the name of the object from the JSON response
+     * @return List of DatabaseObject
+     */
     private fun parseList(response: String, id: String, name: String): List<DatabaseObject> {
         val locationList: MutableList<DatabaseObject> = mutableListOf()
         var jsonObject = JSONObject()
@@ -202,12 +238,24 @@ class DiveCreation {
         return locationList
     }
 
+    /**
+     * fillList used to fill a dropdown menu with a list of objects
+     *
+     * @param spinner Spinner used to fill the dropdown menu
+     * @param list List of DatabaseObject used to fill the dropdown menu
+     */
     private fun fillList(spinner: Spinner, list: List<DatabaseObject>) {
         val adapter = ArrayAdapter(spinner.context, android.R.layout.simple_spinner_item, list)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
     }
 
+    /**
+     * getUserRole used to get the user role
+     *
+     * @param roles Roles used to get the user role
+     * @return MutableList of DatabaseObject
+     */
     private suspend fun getUserRole(roles: String): MutableList<DatabaseObject> {
         return withContext(Dispatchers.IO) {
             val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/user")
@@ -250,6 +298,12 @@ class DiveCreation {
         }
     }
 
+    /**
+     * getRoleAttribution used to get the role attribution
+     *
+     * @param roles Roles used to get the role attribution
+     * @return MutableList of String
+     */
     private suspend fun getRoleAttribution(roles: String): MutableList<String> {
         return withContext(Dispatchers.IO) {
             val dataList = mutableListOf<String>()
@@ -299,6 +353,13 @@ class DiveCreation {
         }
     }
 
+    /**
+     * checkNumberDivers used to check if the number of divers is less than the maximum number of divers
+     *
+     * @param numberDivers Number of divers
+     * @param maxNumberDivers Maximum number of divers
+     * @return Boolean
+     */
     private fun checkNumberDivers(numberDivers: String, maxNumberDivers: String): Boolean {
         if (numberDivers.isEmpty() || maxNumberDivers.isEmpty()) {
             return false
@@ -306,6 +367,12 @@ class DiveCreation {
         return numberDivers.toInt() <= maxNumberDivers.toInt()
     }
 
+    /**
+     * checkDate used to check if the date is valid
+     *
+     * @param date Date
+     * @return Boolean
+     */
     private fun checkDate(date: String): Boolean {
         if (date.isEmpty()) {
             return false
@@ -316,7 +383,11 @@ class DiveCreation {
         return true
     }
 
-
+    /**
+     * postDiveRequest used to post a dive request
+     *
+     * @param data Data used to create the dive
+     */
     private suspend fun postDiveRequest(data: String) {
         return withContext(Dispatchers.IO) {
             val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/createdive?$data")
@@ -332,7 +403,11 @@ class DiveCreation {
         }
     }
 
-
+    /**
+     * createDive used to create a dive
+     *
+     * @param data Data used to create the dive
+     */
     private fun createDive(data: String) {
         (CoroutineScope(Dispatchers.IO)).launch {
             postDiveRequest(data)
