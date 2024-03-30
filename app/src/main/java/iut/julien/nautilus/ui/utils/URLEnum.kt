@@ -1,4 +1,4 @@
-package iut.julien.nautilus.ui
+package iut.julien.nautilus.ui.utils
 
 /**
  * Enum class to store all the URLs used in the app

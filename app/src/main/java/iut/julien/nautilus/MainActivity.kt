@@ -1,5 +1,7 @@
 package iut.julien.nautilus
 
+import androidx.compose.ui.platform.LocalContext
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,23 +12,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import iut.julien.nautilus.ui.utils.PreferencesManager
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableIntState
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,8 +39,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import iut.julien.nautilus.ui.ScreenEnum
-import iut.julien.nautilus.ui.SettingsDialog
+import iut.julien.nautilus.ui.utils.ScreenEnum
 import iut.julien.nautilus.ui.model.DiveListViewModel
 import iut.julien.nautilus.ui.theme.NautilusTheme
 
@@ -71,9 +70,12 @@ class MainActivity : ComponentActivity() {
 fun NautilusApp(modifier: Modifier = Modifier) {
     val diveListViewModel: DiveListViewModel = viewModel()
     diveListViewModel.retrieveDives()
+    val context: Context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager(context) }
+    val storedUserID = remember { mutableStateOf(preferencesManager.getData("userID", "1")) }
+    diveListViewModel.userID.value = storedUserID.value
     val navController = rememberNavController()
     val selectedScreen = remember { mutableIntStateOf(0) }
-    val displayIDSettings = remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             AppTopBar(selectedScreen = selectedScreen)
@@ -81,8 +83,7 @@ fun NautilusApp(modifier: Modifier = Modifier) {
         bottomBar = {
             AppNavigationBar(
                 navController = navController,
-                selectedScreen = selectedScreen,
-                displayIDSettings = displayIDSettings
+                selectedScreen = selectedScreen
             )
         }
     ) { innerPadding ->
@@ -100,9 +101,6 @@ fun NautilusApp(modifier: Modifier = Modifier) {
                     }
                 }
             }
-        }
-        if (displayIDSettings.value) {
-            SettingsDialog().IDSettingsScreen(displayIDSettings, diveListViewModel)
         }
     }
 }
@@ -129,9 +127,9 @@ fun AppTopBar(
                 Image(
                     painter = painterResource(id = R.drawable.logo_simple),
                     contentDescription = "App icon",
-                    modifier = Modifier.width(48.dp)
+                    modifier = Modifier.width(36.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = stringResource(id = R.string.app_name),
                     maxLines = 1,
@@ -150,8 +148,7 @@ fun AppTopBar(
 @Composable
 fun AppNavigationBar(
     navController: NavController,
-    selectedScreen: MutableIntState,
-    displayIDSettings: MutableState<Boolean>
+    selectedScreen: MutableIntState
 ) {
     NavigationBar {
         ScreenEnum.entries.forEachIndexed { index, item ->
@@ -170,12 +167,5 @@ fun AppNavigationBar(
                 }
             )
         }
-        NavigationBarItem(
-            selected = false,
-            onClick = { displayIDSettings.value = !displayIDSettings.value },
-            icon = {
-                Icon(Icons.Filled.Settings, contentDescription = "Diver ID Settings")
-            },
-            label = { Text("Settings") })
     }
 }
