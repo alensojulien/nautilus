@@ -1,5 +1,6 @@
 package iut.julien.nautilus.ui.screen
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,9 +21,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import iut.julien.nautilus.ui.model.DatabaseObject
 import iut.julien.nautilus.ui.model.DiveListViewModel
+import iut.julien.nautilus.ui.utils.PreferencesManager
 
 /**
  * SettingsDialog is a class that contains the IDSettingsScreen composable function.
@@ -42,15 +45,14 @@ class Settings {
     ) {
         diveListViewModel.retrieveAllDivers()
         val userList by diveListViewModel.userList.collectAsState(initial = emptyList())
+        val context: Context = LocalContext.current
+        val preferencesManager = remember { PreferencesManager(context) }
         var userID by remember { mutableStateOf(diveListViewModel.userID.value ?: "1") }
         var expandedDropdown by remember { mutableStateOf(false) }
         var selectedOptionText by remember {
             mutableStateOf(
-                // Search for the user with the current ID
-                userList.find { it.id == userID } ?:
                 DatabaseObject(
-                    id = "1",
-                    name = "Please select a user"
+                    id = "1", name = "Please select a user"
                 )
             )
         }
@@ -68,12 +70,9 @@ class Settings {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = "Select a user")
-            ExposedDropdownMenuBox(
-                expanded = expandedDropdown,
-                onExpandedChange = {
-                    expandedDropdown = !expandedDropdown
-                }
-            ) {
+            ExposedDropdownMenuBox(expanded = expandedDropdown, onExpandedChange = {
+                expandedDropdown = !expandedDropdown
+            }) {
                 TextField(
                     readOnly = true,
                     value = selectedOptionText.name,
@@ -90,23 +89,19 @@ class Settings {
                         .fillMaxWidth()
                 )
                 ExposedDropdownMenu(
-                    expanded = expandedDropdown,
-                    onDismissRequest = {
+                    expanded = expandedDropdown, onDismissRequest = {
                         expandedDropdown = false
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                    }, modifier = Modifier.fillMaxWidth()
                 ) {
                     userList.forEach { user ->
-                        DropdownMenuItem(
-                            text = { Text(text = user.name) },
-                            onClick = {
-                                selectedOptionText = user
-                                userID = user.id
-                                println("User ID: $userID")
-                                diveListViewModel.userID.value = userID
-                                expandedDropdown = false
-                            }
-                        )
+                        DropdownMenuItem(text = { Text(text = user.name) }, onClick = {
+                            selectedOptionText = user
+                            userID = user.id
+                            println("User ID: $userID")
+                            diveListViewModel.userID.value = userID
+                            preferencesManager.saveData("userID", userID)
+                            expandedDropdown = false
+                        })
                     }
                 }
             }

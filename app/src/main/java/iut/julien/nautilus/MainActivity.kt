@@ -1,5 +1,7 @@
 package iut.julien.nautilus
 
+import androidx.compose.ui.platform.LocalContext
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,11 +18,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import iut.julien.nautilus.ui.utils.PreferencesManager
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +70,10 @@ class MainActivity : ComponentActivity() {
 fun NautilusApp(modifier: Modifier = Modifier) {
     val diveListViewModel: DiveListViewModel = viewModel()
     diveListViewModel.retrieveDives()
+    val context: Context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager(context) }
+    val storedUserID = remember { mutableStateOf(preferencesManager.getData("userID", "1")) }
+    diveListViewModel.userID.value = storedUserID.value
     val navController = rememberNavController()
     val selectedScreen = remember { mutableIntStateOf(0) }
     Scaffold(
