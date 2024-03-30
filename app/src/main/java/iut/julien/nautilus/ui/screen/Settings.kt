@@ -67,6 +67,7 @@ class Settings {
                 text = "Settings", style = MaterialTheme.typography.headlineMedium
             )
             Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Select a user")
             ExposedDropdownMenuBox(
                 expanded = expandedDropdown,
                 onExpandedChange = {
@@ -84,7 +85,9 @@ class Settings {
                         )
                     },
                     colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
                 )
                 ExposedDropdownMenu(
                     expanded = expandedDropdown,
