@@ -1,13 +1,18 @@
-package iut.julien.nautilus.ui
+package iut.julien.nautilus.ui.utils
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Create
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import iut.julien.nautilus.ui.model.DiveListViewModel
+import iut.julien.nautilus.ui.screen.DiveCreation
+import iut.julien.nautilus.ui.screen.Dives
+import iut.julien.nautilus.ui.screen.Settings
 
 /**
  * Enum class that represents the different screens of the app.
@@ -48,6 +53,17 @@ enum class ScreenEnum(
         @Composable
         override fun GetContent(diveListViewModel: DiveListViewModel) =
             DiveCreation().DiveCreationScreen(diveListViewModel = diveListViewModel)
+    },
+    // App settings screen
+    Settings(
+        routeName = "Settings",
+        icon = Icons.Outlined.Settings,
+        iconFilled = Icons.Filled.Settings,
+        contentDescription = "Settings"
+    ) {
+        @Composable
+        override fun GetContent(diveListViewModel: DiveListViewModel) =
+            Settings().SettingsScreen(diveListViewModel)
     };
 
     /**
