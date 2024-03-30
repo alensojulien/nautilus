@@ -166,7 +166,8 @@ class Dives {
         // Retrieve the list of dives
         val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
         val expandedCardId = remember { mutableStateOf("") }
-        val likedDives = FileStorage.getFavoriteDives(context = LocalContext.current)
+        val context = LocalContext.current
+        val likedDives = remember { FileStorage.getFavoriteDives(context = context) }
         divesList.forEach { likedDive ->
             likedDive.isLiked = likedDives.contains(likedDive.diveId)
         }
@@ -257,7 +258,7 @@ class Dives {
                 count = filteredDivesList.size,
                 key = { filteredDivesList[it].diveId }) { index ->
                 DiveCard(
-                    diveAttr = filteredDivesList[index],
+                    dive = filteredDivesList[index],
                     diveListViewModel = diveListViewModel,
                     expandedCardId = expandedCardId,
                     context = LocalContext.current
@@ -304,12 +305,11 @@ class Dives {
      */
     @Composable
     fun DiveCard(
-        diveAttr: Dive,
+        dive: Dive,
         diveListViewModel: DiveListViewModel,
         expandedCardId: MutableState<String>,
         context: Context
     ) {
-        val dive = remember { diveAttr }
         val cardExpendedState = remember { mutableStateOf(false) }
         LaunchedEffect(expandedCardId.value) {
             cardExpendedState.value = expandedCardId.value == dive.diveId
@@ -480,7 +480,7 @@ class Dives {
                                     Toast.LENGTH_LONG
                                 ).show()
                             },
-                            enabled = !isRegistered
+                            enabled = !isRegistered && dive.diveNumberDivers < dive.diveMaxNumberDivers
                         ) {
                             Text(text = "Register to this dive")
                         }
