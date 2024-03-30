@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import iut.julien.nautilus.ui.URLEnum
+import iut.julien.nautilus.ui.utils.URLEnum
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -231,6 +231,62 @@ class DiveListViewModel : ViewModel() {
             }
             println("Registered to dive $diveID")
             retrieveDives()
+        }
+    }
+
+    /**
+     * User list
+     */
+    private val _userList = MutableLiveData<MutableList<DatabaseObject>>(
+        mutableStateListOf()
+    )
+
+    /**
+     * Flow of the list of users.
+     */
+    val userList = _userList.asFlow()
+
+    /**
+     * Retrieve the list of all users.
+     */
+    fun retrieveAllDivers() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val url = URL(URLEnum.USER_LIST.url)
+                val responseDivers = StringBuffer()
+                with(url.openConnection() as HttpsURLConnection) {
+                    requestMethod = "GET"
+
+                    BufferedReader(InputStreamReader(inputStream)).use {
+                        var inputLine = it.readLine()
+                        while (inputLine != null) {
+                            responseDivers.append(inputLine)
+                            inputLine = it.readLine()
+                        }
+                        it.close()
+                    }
+                }
+
+                var jsonObject = JSONObject()
+                try {
+                    jsonObject = JSONObject(responseDivers.toString())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                _userList.value?.clear()
+                for (i in 0..<jsonObject.getJSONArray("data").length()) {
+                    _userList.value?.add(
+                        DatabaseObject(
+                            id = jsonObject.getJSONArray("data").getJSONObject(i)
+                                .getString("US_ID"),
+                            name = jsonObject.getJSONArray("data").getJSONObject(i)
+                                .getString("US_FIRST_NAME") + " " + jsonObject.getJSONArray("data")
+                                .getJSONObject(i).getString("US_NAME").uppercase()
+                        )
+                    )
+                }
+                _userList.postValue(_userList.value)
+            }
         }
     }
 }

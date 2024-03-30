@@ -1,4 +1,4 @@
-package iut.julien.nautilus.ui
+package iut.julien.nautilus.ui.screen
 
 import android.content.Context
 import android.net.ConnectivityManager
