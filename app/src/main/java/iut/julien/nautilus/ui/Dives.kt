@@ -14,13 +14,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -30,6 +31,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -136,6 +139,7 @@ class Dives {
     fun DivesContent(diveListViewModel: DiveListViewModel) {
         val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
         val likedDives = FileStorage.getFavoriteDives(context = LocalContext.current)
+        val onlyDisplayLikedDives = remember { mutableStateOf(false) }
         LazyColumn(
             modifier = Modifier
                 .padding(16.dp, 0.dp)
@@ -162,6 +166,19 @@ class Dives {
                 Text(text = "Dives list", style = MaterialTheme.typography.headlineMedium)
                 Spacer(modifier = Modifier.padding(8.dp))
             }
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().padding(8.dp, 0.dp)
+                ) {
+                    Text(
+                        text = "Total dives: ${divesList.size}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    LikedDivesFilterChip(selected = onlyDisplayLikedDives)
+                }
+            }
             if (divesList.isEmpty()) {
                 item {
                     Row(
@@ -176,17 +193,41 @@ class Dives {
                     }
                 }
             }
-            items(count = divesList.size, key = { divesList[it].diveId }) { index ->
+            items(
+                count = divesList.filter { if (onlyDisplayLikedDives.value) likedDives.contains(it.diveId) else true }.size,
+                key = { divesList[it].diveId }) { index ->
                 DiveCard(
                     dive = divesList[index],
                     diveIndex = index,
                     diveListViewModel = diveListViewModel,
                     context = LocalContext.current,
-                    likedDives = likedDives
+                    likedDives = likedDives as ArrayList<String>
                 )
             }
         }
     }
+}
+
+@Composable
+fun LikedDivesFilterChip(selected: MutableState<Boolean>) {
+    FilterChip(
+        onClick = { selected.value = !selected.value },
+        label = {
+            Text(stringResource(R.string.liked_dives_filter))
+        },
+        selected = selected.value,
+        leadingIcon = if (selected.value) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Done,
+                    contentDescription = "Done icon",
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            }
+        } else {
+            null
+        }
+    )
 }
 
 @Composable
@@ -195,7 +236,7 @@ fun DiveCard(
     diveIndex: Int,
     diveListViewModel: DiveListViewModel,
     context: Context,
-    likedDives: List<String>
+    likedDives: ArrayList<String>
 ) {
     val cardExpendedState = remember { mutableStateOf(false) }
     val cardExpandedHeight by animateDpAsState(
@@ -207,7 +248,6 @@ fun DiveCard(
         if (cardExpendedState.value) 180f else 0f,
         label = "Arrow orientation animation"
     )
-    val isLiked = remember { mutableStateOf(likedDives.contains(dive.diveId)) }
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -258,21 +298,22 @@ fun DiveCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val icon = remember {
-                        if (isLiked.value) {
+                        if (likedDives.contains(dive.diveId)) {
                             mutableStateOf(Icons.Filled.Favorite)
                         } else {
                             mutableStateOf(Icons.Filled.FavoriteBorder)
                         }
                     }
                     IconButton(onClick = {
-                        icon.value = if (isLiked.value) {
+                        icon.value = if (likedDives.contains(dive.diveId)) {
                             FileStorage.removeFavoriteDive(diveID = dive.diveId, context = context)
+                            likedDives.remove(dive.diveId)
                             Icons.Filled.FavoriteBorder
                         } else {
                             FileStorage.addFavoriteDive(diveID = dive.diveId, context = context)
+                            likedDives.add(dive.diveId)
                             Icons.Filled.Favorite
                         }
-                        isLiked.value = !isLiked.value
                     }) {
                         Icon(icon.value, contentDescription = "Heart icon")
                     }
