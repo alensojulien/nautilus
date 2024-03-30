@@ -5,6 +5,6 @@ data class DatabaseObject(
     val name: String = ""
 ) {
     override fun toString(): String {
-        return this.name;
+        return this.name
     }
 }

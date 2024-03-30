@@ -29,8 +29,7 @@ import iut.julien.nautilus.ui.model.DiveListViewModel
 class SettingsDialog {
     @Composable
     fun IDSettingsScreen(
-        displayIDSettings: MutableState<Boolean>,
-        diveListViewModel: DiveListViewModel
+        displayIDSettings: MutableState<Boolean>, diveListViewModel: DiveListViewModel
     ) {
         val userID = remember { mutableStateOf(diveListViewModel.userID.value ?: "") }
         val pattern = Regex("^(\\s*|\\d+)\$")
@@ -42,13 +41,11 @@ class SettingsDialog {
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Column(
-                    modifier = Modifier
-                        .padding(16.dp)
+                    modifier = Modifier.padding(16.dp)
 
                 ) {
                     Text(
-                        text = "Settings",
-                        style = MaterialTheme.typography.headlineMedium
+                        text = "Settings", style = MaterialTheme.typography.headlineMedium
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     TextField(
@@ -67,15 +64,12 @@ class SettingsDialog {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
+                        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
                     ) {
-                        TextButton(
-                            onClick = {
-                                displayIDSettings.value = false
-                                diveListViewModel.userID.value = userID.value
-                            }
-                        ) {
+                        TextButton(onClick = {
+                            displayIDSettings.value = false
+                            diveListViewModel.userID.value = userID.value
+                        }) {
                             Text("Save")
                         }
                     }

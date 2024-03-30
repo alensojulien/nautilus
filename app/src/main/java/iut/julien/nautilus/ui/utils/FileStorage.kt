@@ -1,11 +1,6 @@
 package iut.julien.nautilus.ui.utils
 
 import android.content.Context
-import org.json.JSONArray
-import org.json.JSONObject
-import java.io.File
-import java.io.FileWriter
-import kotlin.coroutines.coroutineContext
 
 class FileStorage {
     companion object {

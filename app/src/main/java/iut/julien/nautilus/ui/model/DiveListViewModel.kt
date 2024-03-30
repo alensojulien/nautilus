@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import iut.julien.nautilus.ui.URLEnum
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,7 +30,7 @@ class DiveListViewModel : ViewModel() {
         viewModelScope.launch {
             val listOfDives: MutableList<Dive> = mutableStateListOf()
             withContext(Dispatchers.IO) {
-                val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/dives")
+                val url = URL(URLEnum.DIVES_LIST.url)
                 val responseDives = StringBuffer()
                 with(url.openConnection() as HttpsURLConnection) {
                     requestMethod = "GET"
@@ -94,7 +95,7 @@ class DiveListViewModel : ViewModel() {
     private fun retrieveDivers() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/registration")
+                val url = URL(URLEnum.DIVE_REGISTRATION.url)
                 val responseDivers = StringBuffer()
                 with(url.openConnection() as HttpsURLConnection) {
                     requestMethod = "GET"
@@ -134,7 +135,7 @@ class DiveListViewModel : ViewModel() {
     private fun retrieveDiversInfo() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/user")
+                val url = URL(URLEnum.USER_LIST.url)
                 val responseDivers = StringBuffer()
                 with(url.openConnection() as HttpsURLConnection) {
                     requestMethod = "GET"
@@ -190,9 +191,7 @@ class DiveListViewModel : ViewModel() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val url = URL(
-                    "https://dev-sae301grp3.users.info.unicaen.fr/api/subscribe?US_ID=${userID.value}&DS_CODE=${
-                        diveID
-                    }"
+                    "${URLEnum.DIVE_SUBSCRIBE.url}?US_ID=${userID.value}&DS_CODE=${diveID}"
                 )
                 with(url.openConnection() as HttpsURLConnection) {
                     requestMethod = "POST"

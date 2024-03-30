@@ -195,7 +195,8 @@ class Dives {
                     }
                 }
             }
-            val filteredDivesList = divesList.filter { if (onlyDisplayLikedDives.value) it.isLiked else true }
+            val filteredDivesList =
+                divesList.filter { if (onlyDisplayLikedDives.value) it.isLiked else true }
             if (filteredDivesList.isEmpty()) {
                 item {
                     Column(
@@ -336,7 +337,9 @@ fun DiveCard(
                     }) {
                         Icon(icon.value, contentDescription = "Heart icon")
                     }
-                    IconButton(onClick = { expandedCardId.value = if (cardExpendedState.value) "" else dive.diveId }) {
+                    IconButton(onClick = {
+                        expandedCardId.value = if (cardExpendedState.value) "" else dive.diveId
+                    }) {
                         Icon(
                             Icons.Filled.KeyboardArrowDown,
                             contentDescription = "Arrow down icon",
@@ -393,7 +396,7 @@ fun DiveCard(
                     }
                     items(dive.diveDivers.size) { diverIndex ->
                         val diver = remember { dive.diveDivers[diverIndex] }
-                        Text(text = "${diverIndex+1}. ${diver.diverFirstName} ${diver.diverName.uppercase()}")
+                        Text(text = "${diverIndex + 1}. ${diver.diverFirstName} ${diver.diverName.uppercase()}")
                     }
                 }
                 Row(

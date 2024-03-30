@@ -6,11 +6,13 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.DatabaseObject
@@ -44,7 +46,7 @@ class DiveCreation {
         val security = remember {
             mutableStateListOf(DatabaseObject())
         }
-        val pilote = remember {
+        val pilot = remember {
             mutableStateListOf(DatabaseObject())
         }
         LaunchedEffect(Unit) {
@@ -68,26 +70,27 @@ class DiveCreation {
             levelList.addAll(listLevel)
             val listDirector = getUserRole("DIRECTOR")
             director.addAll(listDirector)
-            val listPilote = getUserRole("PILOTE")
-            pilote.addAll(listPilote)
+            val listPilot = getUserRole("PILOTE")
+            pilot.addAll(listPilot)
             val listSecurity = getUserRole("SECURITY")
             security.addAll(listSecurity)
         }
         AndroidView(
+            modifier = Modifier.fillMaxSize(),
             factory = { context ->
-                val view = LayoutInflater.from(context).inflate(R.layout.activity_main, null)
+                val view = LayoutInflater.from(context).inflate(R.layout.activity_create_dive, null)
                 val startTimeSpinner = view.findViewById<Spinner>(R.id.DS_START_TIME)
                 val locationSpinner = view.findViewById<Spinner>(R.id.DS_LOCATION)
                 val boatSpinner = view.findViewById<Spinner>(R.id.DS_BOAT)
                 val levelSpinner = view.findViewById<Spinner>(R.id.DS_LEVEL)
                 val directorSpinner = view.findViewById<Spinner>(R.id.DS_DIRECTOR)
-                val piloteSpinner = view.findViewById<Spinner>(R.id.DS_PILOT)
+                val pilotSpinner = view.findViewById<Spinner>(R.id.DS_PILOT)
                 val securitySpinner = view.findViewById<Spinner>(R.id.DS_SECURITY)
                 fillList(locationSpinner, locationList)
                 fillList(boatSpinner, boatList)
                 fillList(levelSpinner, levelList)
                 fillList(directorSpinner, director)
-                fillList(piloteSpinner, pilote)
+                fillList(pilotSpinner, pilot)
                 fillList(securitySpinner, security)
                 val numberDivers = view.findViewById<EditText>(R.id.DS_MIN_DIVER)
                 val maxNumberDivers = view.findViewById<EditText>(R.id.DS_MAX_DIVER)
@@ -135,7 +138,7 @@ class DiveCreation {
                     val dlId = getSelectedID(list = locationList, spinner = locationSpinner)
                     val boat = getSelectedID(list = boatList, spinner = boatSpinner)
                     val dsDirector = getSelectedID(list = director, spinner = directorSpinner)
-                    val dsPilot = getSelectedID(list = pilote, spinner = piloteSpinner)
+                    val dsPilot = getSelectedID(list = pilot, spinner = pilotSpinner)
                     val dsSecurity = getSelectedID(list = security, spinner = securitySpinner)
                     val formattedDate = date.text.toString().split("/").reversed().joinToString("/")
 
