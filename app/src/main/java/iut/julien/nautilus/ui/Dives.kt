@@ -138,6 +138,7 @@ class Dives {
     @Composable
     fun DivesContent(diveListViewModel: DiveListViewModel) {
         val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
+        val expandedCardId = remember { mutableStateOf("") }
         val likedDives = FileStorage.getFavoriteDives(context = LocalContext.current)
         divesList.forEach { likedDive ->
             likedDive.isLiked = likedDives.contains(likedDive.diveId)
@@ -215,8 +216,8 @@ class Dives {
                 key = { filteredDivesList[it].diveId }) { index ->
                 DiveCard(
                     dive = filteredDivesList[index],
-                    diveIndex = index,
                     diveListViewModel = diveListViewModel,
+                    expandedCardId = expandedCardId,
                     context = LocalContext.current
                 )
             }
@@ -249,11 +250,14 @@ fun LikedDivesFilterChip(selected: MutableState<Boolean>) {
 @Composable
 fun DiveCard(
     dive: Dive,
-    diveIndex: Int,
     diveListViewModel: DiveListViewModel,
+    expandedCardId: MutableState<String>,
     context: Context
 ) {
     val cardExpendedState = remember { mutableStateOf(false) }
+    LaunchedEffect(expandedCardId.value) {
+        cardExpendedState.value = expandedCardId.value == dive.diveId
+    }
     val cardExpandedHeight by animateDpAsState(
         if (cardExpendedState.value) 264.dp else 0.dp,
         label = "Card expanded height animation"
@@ -332,7 +336,7 @@ fun DiveCard(
                     }) {
                         Icon(icon.value, contentDescription = "Heart icon")
                     }
-                    IconButton(onClick = { cardExpendedState.value = !cardExpendedState.value }) {
+                    IconButton(onClick = { expandedCardId.value = if (cardExpendedState.value) "" else dive.diveId }) {
                         Icon(
                             Icons.Filled.KeyboardArrowDown,
                             contentDescription = "Arrow down icon",
