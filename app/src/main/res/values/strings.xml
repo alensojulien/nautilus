@@ -20,4 +20,5 @@
     <string name="creation_plongee">Diving creation</string>
     <string name="swipe_down_refresh_msg">Swipe down to refresh</string>
     <string name="liked_dives_filter">Display only liked dives</string>
+    <string name="no_liked_dives_to_display_msg">No liked dives to display</string>
 </resources>

@@ -174,12 +174,12 @@ class DiveListViewModel : ViewModel() {
         }
     }
 
-    fun registerToDive(diveIndex: Int) {
+    fun registerToDive(diveID: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val url = URL(
                     "https://dev-sae301grp3.users.info.unicaen.fr/api/subscribe?US_ID=${userID.value}&DS_CODE=${
-                        _divesList.value?.get(diveIndex)?.diveId
+                        diveID
                     }"
                 )
                 with(url.openConnection() as HttpsURLConnection) {
@@ -188,7 +188,9 @@ class DiveListViewModel : ViewModel() {
                     outputStream.flush()
                     println("Post response code : $responseCode")
                 }
+                println(url)
             }
+            println("Registered to dive $diveID")
             retrieveDives()
         }
     }

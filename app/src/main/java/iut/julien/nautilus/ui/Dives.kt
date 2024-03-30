@@ -139,6 +139,9 @@ class Dives {
     fun DivesContent(diveListViewModel: DiveListViewModel) {
         val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
         val likedDives = FileStorage.getFavoriteDives(context = LocalContext.current)
+        divesList.forEach { likedDive ->
+            likedDive.isLiked = likedDives.contains(likedDive.diveId)
+        }
         val onlyDisplayLikedDives = remember { mutableStateOf(false) }
         LazyColumn(
             modifier = Modifier
@@ -168,14 +171,12 @@ class Dives {
             }
             item {
                 Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(8.dp, 0.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp, 0.dp)
                 ) {
-                    Text(
-                        text = "Total dives: ${divesList.size}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
                     LikedDivesFilterChip(selected = onlyDisplayLikedDives)
                 }
             }
@@ -193,15 +194,30 @@ class Dives {
                     }
                 }
             }
+            val filteredDivesList = divesList.filter { if (onlyDisplayLikedDives.value) it.isLiked else true }
+            if (filteredDivesList.isEmpty()) {
+                item {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = stringResource(R.string.no_liked_dives_to_display_msg),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+            }
             items(
-                count = divesList.filter { if (onlyDisplayLikedDives.value) likedDives.contains(it.diveId) else true }.size,
-                key = { divesList[it].diveId }) { index ->
+                count = filteredDivesList.size,
+                key = { filteredDivesList[it].diveId }) { index ->
                 DiveCard(
-                    dive = divesList[index],
+                    dive = filteredDivesList[index],
                     diveIndex = index,
                     diveListViewModel = diveListViewModel,
-                    context = LocalContext.current,
-                    likedDives = likedDives as ArrayList<String>
+                    context = LocalContext.current
                 )
             }
         }
@@ -235,12 +251,11 @@ fun DiveCard(
     dive: Dive,
     diveIndex: Int,
     diveListViewModel: DiveListViewModel,
-    context: Context,
-    likedDives: ArrayList<String>
+    context: Context
 ) {
     val cardExpendedState = remember { mutableStateOf(false) }
     val cardExpandedHeight by animateDpAsState(
-        if (cardExpendedState.value) 250.dp else 0.dp,
+        if (cardExpendedState.value) 264.dp else 0.dp,
         label = "Card expanded height animation"
     )
     cardExpandedHeight.plus(300.dp)
@@ -298,20 +313,20 @@ fun DiveCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val icon = remember {
-                        if (likedDives.contains(dive.diveId)) {
+                        if (dive.isLiked) {
                             mutableStateOf(Icons.Filled.Favorite)
                         } else {
                             mutableStateOf(Icons.Filled.FavoriteBorder)
                         }
                     }
                     IconButton(onClick = {
-                        icon.value = if (likedDives.contains(dive.diveId)) {
+                        icon.value = if (dive.isLiked) {
                             FileStorage.removeFavoriteDive(diveID = dive.diveId, context = context)
-                            likedDives.remove(dive.diveId)
+                            dive.isLiked = false
                             Icons.Filled.FavoriteBorder
                         } else {
                             FileStorage.addFavoriteDive(diveID = dive.diveId, context = context)
-                            likedDives.add(dive.diveId)
+                            dive.isLiked = true
                             Icons.Filled.Favorite
                         }
                     }) {
@@ -363,7 +378,9 @@ fun DiveCard(
                     Text(text = "Divers list", style = MaterialTheme.typography.headlineSmall)
                 }
                 LazyColumn(
-                    modifier = Modifier.padding(16.dp, 0.dp)
+                    modifier = Modifier
+                        .padding(16.dp, 0.dp)
+                        .height(64.dp)
                 ) {
                     if (dive.diveDivers.isEmpty()) {
                         item {
@@ -372,7 +389,7 @@ fun DiveCard(
                     }
                     items(dive.diveDivers.size) { diverIndex ->
                         val diver = remember { dive.diveDivers[diverIndex] }
-                        Text(text = "${diver.diverFirstName} ${diver.diverName}")
+                        Text(text = "${diverIndex+1}. ${diver.diverFirstName} ${diver.diverName.uppercase()}")
                     }
                 }
                 Row(
@@ -389,7 +406,7 @@ fun DiveCard(
 
                     Button(
                         onClick = {
-                            diveListViewModel.registerToDive(diveIndex = diveIndex)
+                            diveListViewModel.registerToDive(diveID = dive.diveId)
                             cardExpendedState.value = false
                         },
                         enabled = !isRegistered
