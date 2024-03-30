@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -472,6 +473,11 @@ class Dives {
                             onClick = {
                                 diveListViewModel.registerToDive(diveID = dive.diveId)
                                 expandedCardId.value = ""
+                                Toast.makeText(
+                                    context,
+                                    "You are now registered to the dive! (${dive.diveLocation} - ${dive.diveDate})",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             },
                             enabled = !isRegistered
                         ) {
