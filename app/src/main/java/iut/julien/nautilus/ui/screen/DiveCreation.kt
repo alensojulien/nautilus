@@ -1,12 +1,12 @@
 package iut.julien.nautilus.ui.screen
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,7 +14,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.DatabaseObject
@@ -23,10 +22,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.io.BufferedReader
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
-import org.json.JSONObject
 
 /**
  * DiveCreation class used to display the dive creation screen
@@ -390,17 +389,12 @@ class DiveCreation {
      *
      * @param data Data used to create the dive
      */
-    private suspend fun postDiveRequest(data: String, context: Context) {
+    private suspend fun postDiveRequest(data: String): Boolean {
         return withContext(Dispatchers.IO) {
             val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/createdive?$data")
             with(url.openConnection() as HttpsURLConnection) {
                 requestMethod = "POST"
-                if (responseCode == 200) {
-                    Log.d("DiveCreation", "Dive created")
-                    diveListViewModel.retrieveDives(context = context)
-                } else {
-                    Log.d("DiveCreation", "Dive not created")
-                }
+                return@withContext responseCode == 200
             }
         }
     }
@@ -412,7 +406,21 @@ class DiveCreation {
      */
     private fun createDive(data: String, context: Context) {
         (CoroutineScope(Dispatchers.IO)).launch {
-            postDiveRequest(data = data, context = context)
+            val success = postDiveRequest(data = data)
+            withContext(Dispatchers.Main) {
+                if (success) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.dive_created_successfully), Toast.LENGTH_LONG
+                    ).show()
+                    diveListViewModel.retrieveDives(context = context)
+                } else {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.failed_to_create_dive), Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
         }
     }
 }

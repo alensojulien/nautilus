@@ -21,4 +21,6 @@
     <string name="swipe_down_refresh_msg">Swipe down to refresh</string>
     <string name="liked_dives_filter">Display only liked dives</string>
     <string name="no_liked_dives_to_display_msg">No liked dives to display</string>
+    <string name="dive_created_successfully">Dive created successfully</string>
+    <string name="failed_to_create_dive">Failed to create dive</string>
 </resources>
