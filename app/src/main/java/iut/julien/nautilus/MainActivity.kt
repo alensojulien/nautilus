@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
      * @param modifier Modifier for styling
      */
     @Composable
-    public fun NautilusApp(modifier: Modifier = Modifier) {
+    fun NautilusApp(modifier: Modifier = Modifier) {
         // View model
         val diveListViewModel: DiveListViewModel = viewModel()
         diveListViewModel.retrieveDives()

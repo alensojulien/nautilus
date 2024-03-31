@@ -66,7 +66,7 @@ import kotlinx.coroutines.delay
 /**
  * Dives list screen composable
  */
-class Dives {
+class DivesList {
 
     /**
      * Dives screen composable
@@ -417,7 +417,7 @@ class Dives {
                         }) {
                             Icon(
                                 Icons.Filled.KeyboardArrowDown,
-                                contentDescription = "Arrow down icon",
+                                contentDescription = "Card expand arrow down icon",
                                 modifier = Modifier.rotate(arrowDownOrientation)
                             )
                         }

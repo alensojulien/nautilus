@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import iut.julien.nautilus.ui.model.DiveListViewModel
 import iut.julien.nautilus.ui.screen.DiveCreation
-import iut.julien.nautilus.ui.screen.Dives
+import iut.julien.nautilus.ui.screen.DivesList
 import iut.julien.nautilus.ui.screen.Settings
 
 /**
@@ -39,7 +39,7 @@ enum class ScreenEnum(
     ) {
         @Composable
         override fun GetContent(diveListViewModel: DiveListViewModel) =
-            Dives().DivesScreen(diveListViewModel)
+            DivesList().DivesScreen(diveListViewModel)
     },
     /**
      * The Dive creation screen.
@@ -74,5 +74,5 @@ enum class ScreenEnum(
     @Composable
     @Override
     open fun GetContent(diveListViewModel: DiveListViewModel) =
-        Dives().DivesScreen(diveListViewModel)
+        DivesList().DivesScreen(diveListViewModel)
 }
