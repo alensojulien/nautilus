@@ -255,6 +255,7 @@ class DivesList {
                         dive = dive,
                         diveListViewModel = diveListViewModel,
                         expandedCardId = expandedCardId,
+                        onlyDisplayLikedDives = onlyDisplayLikedDives,
                         context = LocalContext.current
                     )
                 }
@@ -320,6 +321,7 @@ class DivesList {
         dive: Dive,
         diveListViewModel: DiveListViewModel,
         expandedCardId: MutableState<String>,
+        onlyDisplayLikedDives: MutableState<Boolean>,
         context: Context
     ) {
         val cardExpendedState = remember { mutableStateOf(false) }
@@ -365,7 +367,7 @@ class DivesList {
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 text = dive.diveLocation,
-                                style = MaterialTheme.typography.headlineMedium,
+                                style = MaterialTheme.typography.headlineSmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
@@ -385,28 +387,30 @@ class DivesList {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val icon = remember {
-                            if (dive.isLiked) {
-                                mutableStateOf(Icons.Filled.Favorite)
-                            } else {
-                                mutableStateOf(Icons.Filled.FavoriteBorder)
+                        if (!onlyDisplayLikedDives.value) {
+                            val icon = remember {
+                                if (dive.isLiked) {
+                                    mutableStateOf(Icons.Filled.Favorite)
+                                } else {
+                                    mutableStateOf(Icons.Filled.FavoriteBorder)
+                                }
                             }
-                        }
-                        IconButton(onClick = {
-                            icon.value = if (dive.isLiked) {
-                                FileStorage.removeFavoriteDive(
-                                    diveID = dive.diveId,
-                                    context = context
-                                )
-                                dive.isLiked = false
-                                Icons.Filled.FavoriteBorder
-                            } else {
-                                FileStorage.addFavoriteDive(diveID = dive.diveId, context = context)
-                                dive.isLiked = true
-                                Icons.Filled.Favorite
+                            IconButton(onClick = {
+                                icon.value = if (dive.isLiked) {
+                                    FileStorage.removeFavoriteDive(
+                                        diveID = dive.diveId,
+                                        context = context
+                                    )
+                                    dive.isLiked = false
+                                    Icons.Filled.FavoriteBorder
+                                } else {
+                                    FileStorage.addFavoriteDive(diveID = dive.diveId, context = context)
+                                    dive.isLiked = true
+                                    Icons.Filled.Favorite
+                                }
+                            }) {
+                                Icon(icon.value, contentDescription = "Heart icon")
                             }
-                        }) {
-                            Icon(icon.value, contentDescription = "Heart icon")
                         }
                         IconButton(onClick = {
                             expandedCardId.value = if (cardExpendedState.value) "" else dive.diveId
