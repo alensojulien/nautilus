@@ -86,7 +86,7 @@ class Dives {
         var refreshing by remember { mutableStateOf(false) }
         LaunchedEffect(refreshing) {
             if (refreshing) {
-                delay(3000)
+                delay(1500)
                 refreshing = false
             }
         }
@@ -174,25 +174,12 @@ class Dives {
         val onlyDisplayLikedDives = remember { mutableStateOf(false) }
         LazyColumn(
             modifier = Modifier
-                .padding(16.dp, 0.dp)
+                .padding(16.dp, 0.dp, 16.dp, 16.dp)
                 .fillMaxWidth()
         ) {
             // Display the swipe down refresh message
             item {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Arrow down icon")
-                    Text(
-                        text = stringResource(R.string.swipe_down_refresh_msg),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontStyle = FontStyle.Italic
-                    )
-                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Arrow down icon")
-                }
+                SwipeDownRefreshMessage()
             }
 
             // Display the dives list title
@@ -254,17 +241,46 @@ class Dives {
             }
 
             // Display the dives list
-            items(
-                count = filteredDivesList.size,
-                key = { filteredDivesList[it].diveId }) { index ->
-                DiveCard(
-                    dive = filteredDivesList[index],
-                    diveListViewModel = diveListViewModel,
-                    expandedCardId = expandedCardId,
-                    context = LocalContext.current
-                )
+            // Version with correct use of the LazyColumn but lags when scrolling
+//            items(
+//                count = filteredDivesList.size,
+//                key = { filteredDivesList[it].diveId }) { index ->
+//                DiveCard(
+//                    dive = filteredDivesList[index],
+//                    diveListViewModel = diveListViewModel,
+//                    expandedCardId = expandedCardId,
+//                    context = LocalContext.current
+//                )
+//            }
+            // Version with incorrect use of the LazyColumn but no lags when scrolling
+            item {
+                for (dive in filteredDivesList) {
+                    DiveCard(
+                        dive = dive,
+                        diveListViewModel = diveListViewModel,
+                        expandedCardId = expandedCardId,
+                        context = LocalContext.current
+                    )
+                }
             }
+        }
+    }
 
+    @Composable
+    fun SwipeDownRefreshMessage() {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Arrow down icon")
+            Text(
+                text = stringResource(R.string.swipe_down_refresh_msg),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium,
+                fontStyle = FontStyle.Italic
+            )
+            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Arrow down icon")
         }
     }
 
@@ -323,6 +339,7 @@ class Dives {
             if (cardExpendedState.value) 180f else 0f,
             label = "Arrow orientation animation"
         )
+
         Card(
             modifier = Modifier
                 .padding(8.dp)
