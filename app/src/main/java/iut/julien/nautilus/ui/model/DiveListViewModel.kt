@@ -2,7 +2,6 @@ package iut.julien.nautilus.ui.model
 
 import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
@@ -102,9 +101,11 @@ class DiveListViewModel : ViewModel() {
                     likedDive.isLiked = likedDives.contains(likedDive.diveId)
                 }
 
+                val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
                 listOfDives.sortWith(
                     compareBy(
-                        { it.diveDate },
+                        { LocalDate.parse(it.diveDate, formatter) },
                         { it.diveId })
                 )
                 _divesList.postValue(listOfDives)
