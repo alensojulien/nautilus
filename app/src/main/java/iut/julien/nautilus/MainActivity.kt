@@ -69,10 +69,10 @@ class MainActivity : ComponentActivity() {
     fun NautilusApp(modifier: Modifier = Modifier) {
         // View model
         val diveListViewModel: DiveListViewModel = viewModel()
-        diveListViewModel.retrieveDives()
+        val context = LocalContext.current
+        diveListViewModel.retrieveDives(context = context)
 
         // Preferences
-        val context: Context = LocalContext.current
         val preferencesManager = remember { PreferencesManager(context) }
         val storedUserID = remember { mutableStateOf(preferencesManager.getData("userID", "1")) }
         diveListViewModel.userID.value = storedUserID.value

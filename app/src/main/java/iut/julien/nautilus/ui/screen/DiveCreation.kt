@@ -1,5 +1,6 @@
 package iut.julien.nautilus.ui.screen
 
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
@@ -13,6 +14,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import iut.julien.nautilus.R
 import iut.julien.nautilus.ui.model.DatabaseObject
@@ -157,7 +159,7 @@ class DiveCreation {
 
                     val data =
                         "DS_DATE=${formattedDate}&DS_START_TIME=${startTimeSpinner.selectedItem}&LOCATION=${dlId}&BOAT=${boat}&DS_LEVEL=${levelSpinner.selectedItem}&DS_DIRECTOR=${dsDirector}&DS_PILOT=${dsPilot}&DS_SECURITY=${dsSecurity}&DS_MIN_DIVER=${numberDivers.text}&DS_MAX_DIVER=${maxNumberDivers.text}"
-                    createDive(data)
+                    createDive(data = data, context = context)
                 }
                 view
             }
@@ -388,14 +390,14 @@ class DiveCreation {
      *
      * @param data Data used to create the dive
      */
-    private suspend fun postDiveRequest(data: String) {
+    private suspend fun postDiveRequest(data: String, context: Context) {
         return withContext(Dispatchers.IO) {
             val url = URL("https://dev-sae301grp3.users.info.unicaen.fr/api/createdive?$data")
             with(url.openConnection() as HttpsURLConnection) {
                 requestMethod = "POST"
                 if (responseCode == 200) {
                     Log.d("DiveCreation", "Dive created")
-                    diveListViewModel.retrieveDives()
+                    diveListViewModel.retrieveDives(context = context)
                 } else {
                     Log.d("DiveCreation", "Dive not created")
                 }
@@ -408,9 +410,9 @@ class DiveCreation {
      *
      * @param data Data used to create the dive
      */
-    private fun createDive(data: String) {
+    private fun createDive(data: String, context: Context) {
         (CoroutineScope(Dispatchers.IO)).launch {
-            postDiveRequest(data)
+            postDiveRequest(data = data, context = context)
         }
     }
 }

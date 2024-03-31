@@ -76,6 +76,7 @@ class DivesList {
     @Composable
     fun DivesScreen(diveListViewModel: DiveListViewModel) {
         val openDialog = remember { mutableStateOf(true) }
+        val context = LocalContext.current
 
         // Check if the user is online
         if (!isOnline(LocalContext.current) && openDialog.value) {
@@ -95,7 +96,7 @@ class DivesList {
             state = rememberSwipeRefreshState(isRefreshing = refreshing),
             onRefresh = {
                 refreshing = true
-                diveListViewModel.retrieveDives()
+                diveListViewModel.retrieveDives(context = context)
             }
         ) {
             DivesContent(diveListViewModel = diveListViewModel)
@@ -166,11 +167,6 @@ class DivesList {
         // Retrieve the list of dives
         val divesList by diveListViewModel.divesList.collectAsState(initial = emptyList())
         val expandedCardId = remember { mutableStateOf("") }
-        val context = LocalContext.current
-        val likedDives = remember { FileStorage.getFavoriteDives(context = context) }
-        divesList.forEach { likedDive ->
-            likedDive.isLiked = likedDives.contains(likedDive.diveId)
-        }
         val onlyDisplayLikedDives = remember { mutableStateOf(false) }
         LazyColumn(
             modifier = Modifier
@@ -489,7 +485,7 @@ class DivesList {
 
                         Button(
                             onClick = {
-                                diveListViewModel.registerToDive(diveID = dive.diveId)
+                                diveListViewModel.registerToDive(diveID = dive.diveId, context = context)
                                 expandedCardId.value = ""
                                 Toast.makeText(
                                     context,

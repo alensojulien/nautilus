@@ -1,10 +1,13 @@
 package iut.julien.nautilus.ui.model
 
+import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import iut.julien.nautilus.ui.utils.FileStorage
 import iut.julien.nautilus.ui.utils.URLEnum
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,7 +44,7 @@ class DiveListViewModel : ViewModel() {
     /**
      * Retrieve the list of dives.
      */
-    fun retrieveDives() {
+    fun retrieveDives(context: Context) {
         viewModelScope.launch {
             val listOfDives: MutableList<Dive> = mutableStateListOf()
             withContext(Dispatchers.IO) {
@@ -93,6 +96,12 @@ class DiveListViewModel : ViewModel() {
                         )
                     )
                 }
+
+                val likedDives = FileStorage.getFavoriteDives(context = context)
+                listOfDives.forEach { likedDive ->
+                    likedDive.isLiked = likedDives.contains(likedDive.diveId)
+                }
+
                 listOfDives.sortWith(
                     compareBy(
                         { it.diveDate },
@@ -212,7 +221,7 @@ class DiveListViewModel : ViewModel() {
      *
      * @param diveID Dive ID.
      */
-    fun registerToDive(diveID: String) {
+    fun registerToDive(diveID: String, context: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val url = URL(
@@ -227,7 +236,7 @@ class DiveListViewModel : ViewModel() {
                 println(url)
             }
             println("Registered to dive $diveID")
-            retrieveDives()
+            retrieveDives(context = context)
         }
     }
 
